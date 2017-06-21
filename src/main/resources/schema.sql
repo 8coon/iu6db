@@ -2,7 +2,9 @@
 
 
 DROP TABLE IF EXISTS Orders;
+DROP TABLE IF EXISTS Flights;
 DROP TABLE IF EXISTS Airports;
+DROP TABLE IF EXISTS Airlines;
 DROP TABLE IF EXISTS Cities;
 DROP TABLE IF EXISTS Users;
 
@@ -23,6 +25,13 @@ CREATE TABLE IF NOT EXISTS Cities (
 );
 
 
+CREATE TABLE IF NOT EXISTS Airlines (
+  id SERIAL PRIMARY KEY,
+  name TEXT,
+  code TEXT
+);
+
+
 CREATE TABLE IF NOT EXISTS Airports (
   id SERIAL PRIMARY KEY,
   city INT REFERENCES Cities,
@@ -31,13 +40,21 @@ CREATE TABLE IF NOT EXISTS Airports (
 );
 
 
+CREATE TABLE IF NOT EXISTS Flights (
+  id SERIAL PRIMARY KEY,
+  fromAirport INT REFERENCES Airports,
+  toAirport INT REFERENCES Airports,
+  dateStart TIMESTAMP,
+  dateEnd TIMESTAMP CHECK (dateEnd > dateStart),
+  airline INT REFERENCES Airlines
+);
+
+
 CREATE TABLE IF NOT EXISTS Orders (
   id SERIAL PRIMARY KEY,
   client INT REFERENCES Users,
-  dateOrdered TIMESTAMPTZ,
-  dateFlying TIMESTAMPTZ,
-  cityFrom INT REFERENCES Cities,
-  cityTo INT REFERENCES Cities
+  date TIMESTAMP,
+  flight INT REFERENCES Flights
 );
 
 
@@ -98,6 +115,78 @@ CREATE OR REPLACE FUNCTION generateAirports() RETURNS VOID AS 'BEGIN
 END; ' LANGUAGE plpgsql;
 
 
+CREATE OR REPLACE FUNCTION generateAirlines() RETURNS VOID AS 'BEGIN
+  INSERT INTO Airlines (name, code) VALUES
+    (''Air China'', ''CA''),
+    (''Cubana de Aviación'', ''CU''),
+    (''Scandinavian Airlines'', ''SK''),
+    (''Finnair'', ''AY''),
+    (''Air France'', ''AF''),
+    (''Lufthansa'', ''LH''),
+    (''Alitalia'', ''AZ''),
+    (''Japan Airlines'', ''JAL''),
+    (''Malaysia Airlines'', ''MH''),
+    (''Aeroméxico'', ''AM''),
+    (''Singapore Airlines'', ''SQ''),
+    (''British Airways'', ''BA''),
+    (''Aeroflot'', ''SU''),
+    (''American Airlines'', ''AA''),
+    (''Delta Air Lines'', ''DL''),
+    (''United Airlines'', ''UA'');
+END;' LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION generateFlights(amount INT) RETURNS VOID AS '
+DECLARE
+  dateStart TIMESTAMP;
+  errors INT;
+BEGIN
+  errors := 0;
+
+  FOR i IN 1..amount LOOP
+    dateStart := (SELECT TIMESTAMP ''2014-01-10 20:00:00'' +
+                         random() * (TIMESTAMP ''2014-01-20 20:00:00'' -
+                                     TIMESTAMP ''2018-01-10 10:00:00''));
+    BEGIN
+      INSERT INTO Flights (fromAirport, toAirport, dateStart, dateEnd, airline) VALUES
+        (
+          (SELECT id FROM Airports OFFSET floor(random() * (SELECT count(*) FROM Airports)) LIMIT 1),
+          (SELECT id FROM Airports OFFSET floor(random() * (SELECT count(*) FROM Airports)) LIMIT 1),
+          dateStart,
+          dateStart + random() * (TIMESTAMP ''2014-01-10 20:00:00'' -
+                                  TIMESTAMP ''2014-01-10 10:00:00''),
+          (SELECT id FROM Airlines OFFSET floor(random() * (SELECT count(*) FROM Airlines)) LIMIT 1)
+        );
+    EXCEPTION WHEN check_violation THEN
+      errors := errors + 1;
+    END;
+  END LOOP;
+
+  IF errors > 0 THEN
+    PERFORM generateFlights(errors);
+  END IF;
+END;' LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION generateOrders(amount INT) RETURNS VOID AS 'BEGIN
+  FOR i IN 1..amount LOOP
+    CREATE TEMPORARY TABLE flight AS
+      (SELECT * FROM Flights OFFSET floor(random() * (SELECT count(*) FROM Users)) LIMIT 1);
+
+    INSERT INTO Orders (client, date, flight) VALUES
+      (
+        (SELECT id FROM Users OFFSET floor(random() * (SELECT count(*) FROM Users)) LIMIT 1),
+        (SELECT dateStart FROM flight)::TIMESTAMP - random() * (TIMESTAMP ''2014-02-01 10:00:00'' -
+          TIMESTAMP ''2014-01-10 10:00:00'') - (TIMESTAMP ''2014-01-10 10:00:00'' -
+                                                TIMESTAMP ''2014-01-01 10:00:00''),
+        (SELECT id FROM flight)
+      );
+
+    DROP TABLE flight;
+  END LOOP;
+END;' LANGUAGE plpgsql;
+
+
 CREATE OR REPLACE FUNCTION generateUsers(amount INT) RETURNS VOID AS 'BEGIN EXECUTE ''
   CREATE TEMPORARY TABLE firstNamesM (value TEXT) ON COMMIT DELETE ROWS;
   INSERT INTO firstNamesM (value) VALUES
@@ -123,7 +212,7 @@ CREATE OR REPLACE FUNCTION generateUsers(amount INT) RETURNS VOID AS 'BEGIN EXEC
   INSERT INTO midNamesF (value) VALUES
     (''''Семёновна''''), (''''Алексеевна''''), (''''Юрьевна''''), (''''Магомедовна''''), (''''Филипповна''''), (''''Эдуардовна'''');'';
 
-  FOR i in 0..amount LOOP
+  FOR i IN 1..amount LOOP
     IF (SELECT random()) > 0.5 THEN EXECUTE ''
       INSERT INTO Users (firstName, lastName, midName, document) VALUES
         (
@@ -145,6 +234,23 @@ CREATE OR REPLACE FUNCTION generateUsers(amount INT) RETURNS VOID AS 'BEGIN EXEC
 END; ' LANGUAGE plpgsql;
 
 
+CREATE OR REPLACE FUNCTION flightCheck() RETURNS TRIGGER AS 'BEGIN
+  IF (SELECT city FROM Airports WHERE id = NEW.toAirport) =
+     (SELECT city FROM Airports WHERE id = NEW.fromAirport) THEN
+    RAISE EXCEPTION check_violation;
+  END IF;
+
+  RETURN NEW;
+END;' LANGUAGE plpgsql;
+
+
+DROP TRIGGER IF EXISTS onFlightChange ON Flights;
+CREATE TRIGGER onFlightChange BEFORE INSERT OR UPDATE ON Flights FOR EACH ROW EXECUTE PROCEDURE flightCheck();
+
+
 SELECT generateCities();
 SELECT generateAirports();
+SELECT generateAirlines();
+SELECT generateFlights(10000);
 SELECT generateUsers(50);
+SELECT generateOrders(10);
