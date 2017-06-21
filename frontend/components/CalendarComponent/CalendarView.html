@@ -1,0 +1,23 @@
+<app-view id="CalendarView">
+
+    <div class="calendar-container hidden">
+        <div class="calendar-header no-select">
+            <div class="calendar-month-left calendar-scroller">
+                <i class="fa fa-angle-left"></i>
+            </div>
+
+            <div class="calendar-month">
+                <view-for variable="month" in="[$.monthName]">
+                    <view-eval value="month"></view-eval>
+                </view-for>
+            </div>
+
+            <div class="calendar-month-right calendar-scroller">
+                <i class="fa fa-angle-right"></i>
+            </div>
+        </div>
+
+        <view-component name="TableComponent" class="calendar-table"></view-component>
+    </div>
+
+</app-view>

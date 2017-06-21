@@ -54,7 +54,8 @@ CREATE TABLE IF NOT EXISTS Orders (
   id SERIAL PRIMARY KEY,
   client INT REFERENCES Users,
   date TIMESTAMP,
-  flight INT REFERENCES Flights
+  flight INT REFERENCES Flights,
+  reverse INT REFERENCES Orders DEFAULT NULL
 );
 
 
