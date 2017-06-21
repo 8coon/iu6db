@@ -1,6 +1,10 @@
 -- noinspection SqlNoDataSourceInspectionForFile
 
 
+DROP TABLE IF EXISTS Orders;
+DROP TABLE IF EXISTS Cities;
+DROP TABLE IF EXISTS Users;
+
 
 CREATE TABLE IF NOT EXISTS Users (
   id SERIAL PRIMARY KEY,

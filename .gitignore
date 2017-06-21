@@ -1,3 +1,5 @@
 .idea
 iu6db.iml
 target
+frontend/dist
+frontend/node_modules
