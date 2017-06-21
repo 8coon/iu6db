@@ -30,13 +30,15 @@ public class Flight {
     public ResponseEntity<List<FlightData>> list(
             @RequestParam(name = "from", required = true) int fromCity,
             @RequestParam(name = "to", required = true) int toCity,
+            @RequestParam(name = "date", required = true) String date,
             @RequestParam(name = "connecting", defaultValue = "false", required = false) boolean connectingFlights
     ) {
         return new ResponseEntity<>(
                 this.jdbc.query(
-                        "SELECT * FROM flightsFromCityToCity WHERE fromCityId = ? AND toCityId = ?",
+                        "SELECT * FROM flightsFromCityToCity WHERE " +
+                                "fromCityId = ? AND toCityId = ? AND dateStart::DATE = ?::TIMESTAMP::DATE",
                         new FlightData(),
-                        fromCity, toCity
+                        fromCity, toCity, date
                 ),
                 HttpStatus.OK
         );

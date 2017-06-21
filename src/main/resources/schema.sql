@@ -147,9 +147,9 @@ BEGIN
   errors := 0;
 
   FOR i IN 1..amount LOOP
-    dateStart := (SELECT TIMESTAMP ''2014-01-10 20:00:00'' +
-                         random() * (TIMESTAMP ''2014-01-20 20:00:00'' -
-                                     TIMESTAMP ''2018-01-10 10:00:00''));
+    dateStart := (SELECT TIMESTAMP ''2017-01-10 20:00:00'' +
+                         random() * (TIMESTAMP ''2017-03-20 20:00:00'' -
+                                     TIMESTAMP ''2017-01-10 10:00:00''));
     BEGIN
       INSERT INTO Flights (fromAirport, toAirport, dateStart, dateEnd, airline) VALUES
         (

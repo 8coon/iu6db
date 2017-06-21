@@ -17,7 +17,7 @@ public class OrderData implements RowMapper<OrderData> {
     private int id;
     private int client;
     private String date;
-    private int flight;
+    private int[] flight;
     private Integer reverse = null;
 
 
@@ -26,7 +26,7 @@ public class OrderData implements RowMapper<OrderData> {
             @JsonProperty("id") int id,
             @JsonProperty("client") int client,
             @JsonProperty("date") String date,
-            @JsonProperty("flight") int flight,
+            @JsonProperty("flight") int[] flight,
             @JsonProperty("reverse") Integer reverse
     ) {
         this.id = id;
@@ -49,7 +49,7 @@ public class OrderData implements RowMapper<OrderData> {
                 ).format(
                         DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS")
                 ),
-                resultSet.getInt("flight"),
+                (int[]) resultSet.getArray("flight").getArray(),
                 (Integer) resultSet.getObject("reverse")
         );
     }
@@ -79,11 +79,11 @@ public class OrderData implements RowMapper<OrderData> {
         this.date = date;
     }
 
-    public int getFlight() {
+    public int[] getFlight() {
         return flight;
     }
 
-    public void setFlight(int flight) {
+    public void setFlight(int[] flight) {
         this.flight = flight;
     }
 
