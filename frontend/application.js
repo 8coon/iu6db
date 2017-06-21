@@ -11,4 +11,4 @@ requireAll(require.context('./views/', true, /\.(js|css|html)$/));
 //requireAll(require.context('./models/', true, /\.(js|css|html)$/));
 //requireAll(require.context('./interceptors/', true, /\.(js|css|html)$/));
 //requireAll(require.context('./validators/', true, /\.(js|css|html)$/));
-//requireAll(require.context('./dist/compiled/', true, /\.(js|css|html)$/));
+requireAll(require.context('./dist/compiled/', true, /\.(js|css|html)$/));
