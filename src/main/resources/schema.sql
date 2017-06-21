@@ -56,7 +56,7 @@ CREATE TABLE IF NOT EXISTS Orders (
   id SERIAL PRIMARY KEY,
   client INT REFERENCES Users,
   date TIMESTAMP,
-  flight INT REFERENCES Flights,
+  flight INT[],
   reverse INT REFERENCES Orders DEFAULT NULL
 );
 
@@ -182,7 +182,7 @@ CREATE OR REPLACE FUNCTION generateOrders(amount INT) RETURNS VOID AS 'BEGIN
         (SELECT dateStart FROM flight)::TIMESTAMP - random() * (TIMESTAMP ''2014-02-01 10:00:00'' -
           TIMESTAMP ''2014-01-10 10:00:00'') - (TIMESTAMP ''2014-01-10 10:00:00'' -
                                                 TIMESTAMP ''2014-01-01 10:00:00''),
-        (SELECT id FROM flight)
+        ARRAY[]::INT[] || (SELECT id FROM flight)
       );
 
     DROP TABLE flight;
@@ -304,7 +304,7 @@ CREATE VIEW clientOrders AS (
     FROM
       Orders
       JOIN Users ON Orders.client = Users.id
-      JOIN Flights ON Orders.flight = Flights.id
+      JOIN Flights ON Orders.flight[1] = Flights.id
       JOIN Airlines ON Flights.airline = Airlines.id
       JOIN Airports AS FromAirport ON Flights.fromAirport = FromAirport.id
       JOIN Airports AS ToAirport ON Flights.toAirport = ToAirport.id
@@ -320,8 +320,8 @@ CREATE VIEW flightsFromCityToCity AS (
     ToAirports.code AS toAirportCode,
     Airlines.name AS airlineName,
     Airlines.code AS airlineCode,
-    FromCity.name AS fromCityName,
-    ToCity.name AS toCityName,
+    FromCity.name AS fromCityName, FromCity.id AS fromCityId,
+    ToCity.name AS toCityName, ToCity.id AS toCityId,
     dateEnd - dateStart AS duration
   FROM
     Flights
