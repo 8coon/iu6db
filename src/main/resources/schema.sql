@@ -2,6 +2,7 @@
 
 DROP VIEW IF EXISTS flightsFromCity;
 DROP VIEW IF EXISTS clientOrders;
+DROP VIEW IF EXISTS flightsFromCityToCity;
 DROP TABLE IF EXISTS Orders;
 DROP TABLE IF EXISTS Flights;
 DROP TABLE IF EXISTS Airports;
@@ -309,4 +310,29 @@ CREATE VIEW clientOrders AS (
       JOIN Airports AS ToAirport ON Flights.toAirport = ToAirport.id
       JOIN Cities AS FromCity ON FromAirport.city = FromCity.id
       JOIN Cities AS ToCity ON ToAirport.city = ToCity.id
-)
+);
+
+
+CREATE VIEW flightsFromCityToCity AS (
+  SELECT
+    Flights.id AS id, fromAirport, toAirport, dateStart, dateEnd, airline,
+    FromAirports.code AS fromAirportCode,
+    ToAirports.code AS toAirportCode,
+    Airlines.name AS airlineName,
+    Airlines.code AS airlineCode,
+    FromCity.name AS fromCityName,
+    ToCity.name AS toCityName,
+    dateEnd - dateStart AS duration
+  FROM
+    Flights
+    JOIN Airports AS FromAirports ON fromAirport = FromAirports.id
+    JOIN Airports AS ToAirports ON toAirport = ToAirports.id
+    JOIN Airlines ON airline = Airlines.id
+    JOIN Cities AS FromCity ON FromAirports.city = FromCity.id
+    JOIN Cities AS ToCity ON ToAirports.city = ToCity.id
+  ORDER BY
+    duration ASC
+);
+
+
+
