@@ -1,6 +1,6 @@
 -- noinspection SqlNoDataSourceInspectionForFile
 
-
+DROP VIEW IF EXISTS flightsFromCity;
 DROP TABLE IF EXISTS Orders;
 DROP TABLE IF EXISTS Flights;
 DROP TABLE IF EXISTS Airports;
@@ -240,6 +240,10 @@ CREATE OR REPLACE FUNCTION flightCheck() RETURNS TRIGGER AS 'BEGIN
     RAISE EXCEPTION check_violation;
   END IF;
 
+  IF (NEW.dateEnd - NEW.dateStart) < (TIMESTAMP ''2014-01-01 11:00:00'' - TIMESTAMP ''2014-01-01 10:00:00'') THEN
+    RAISE EXCEPTION check_violation;
+  END IF;
+
   RETURN NEW;
 END;' LANGUAGE plpgsql;
 
@@ -254,3 +258,23 @@ SELECT generateAirlines();
 SELECT generateFlights(10000);
 SELECT generateUsers(50);
 SELECT generateOrders(10);
+
+
+
+CREATE VIEW flightsFromCity AS (
+    SELECT
+      Flights.id AS id, fromAirport, toAirport, dateStart, dateEnd, airline,
+      FromAirports.code AS fromAirportCode,
+      ToAirports.code AS toAirportCode,
+      Airlines.name AS airlineName,
+      Airlines.code AS airlineCode,
+      Cities.id AS city,
+      Cities.name AS cityName,
+      dateEnd - dateStart AS duration
+    FROM
+      Flights
+      JOIN Airports AS FromAirports ON fromAirport = FromAirports.id
+      JOIN Airports AS ToAirports ON toAirport = ToAirports.id
+      JOIN Airlines ON airline = Airlines.id
+      JOIN Cities ON FromAirports.city = Cities.id
+);
