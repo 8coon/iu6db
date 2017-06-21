@@ -1,6 +1,7 @@
 -- noinspection SqlNoDataSourceInspectionForFile
 
 DROP VIEW IF EXISTS flightsFromCity;
+DROP VIEW IF EXISTS clientOrders;
 DROP TABLE IF EXISTS Orders;
 DROP TABLE IF EXISTS Flights;
 DROP TABLE IF EXISTS Airports;
@@ -125,7 +126,7 @@ CREATE OR REPLACE FUNCTION generateAirlines() RETURNS VOID AS 'BEGIN
     (''Air France'', ''AF''),
     (''Lufthansa'', ''LH''),
     (''Alitalia'', ''AZ''),
-    (''Japan Airlines'', ''JAL''),
+    (''Japan Airlines'', ''JA''),
     (''Malaysia Airlines'', ''MH''),
     (''Aeroméxico'', ''AM''),
     (''Singapore Airlines'', ''SQ''),
@@ -279,3 +280,33 @@ CREATE VIEW flightsFromCity AS (
       JOIN Airlines ON airline = Airlines.id
       JOIN Cities ON FromAirports.city = Cities.id
 );
+
+
+
+CREATE VIEW clientOrders AS (
+    SELECT
+      Orders.id AS id, client, date, flight, reverse,
+      (Users.lastName || ' '::TEXT || Users.firstName || ' '::TEXT || Users.midName) AS clientName,
+      Flights.id AS flightId,
+      Flights.dateStart AS flightStart,
+      Flights.dateEnd AS flightEnd,
+      Airlines.code AS airlineCode,
+      Airlines.name AS airlineName,
+      FromAirport.code AS fromAirportCode,
+      FromAirport.name AS fromAirportName,
+      ToAirport.code AS toAirportCode,
+      ToAirport.name AS toAirportName,
+      FromCity.name AS fromCityName,
+      FromCity.country AS fromCityCountry,
+      ToCity.name AS toCityName,
+      ToCity.country AS toCityCountry
+    FROM
+      Orders
+      JOIN Users ON Orders.client = Users.id
+      JOIN Flights ON Orders.flight = Flights.id
+      JOIN Airlines ON Flights.airline = Airlines.id
+      JOIN Airports AS FromAirport ON Flights.fromAirport = FromAirport.id
+      JOIN Airports AS ToAirport ON Flights.toAirport = ToAirport.id
+      JOIN Cities AS FromCity ON FromAirport.city = FromCity.id
+      JOIN Cities AS ToCity ON ToAirport.city = ToCity.id
+)
