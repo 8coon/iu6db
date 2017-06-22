@@ -82,7 +82,7 @@ export class FlightData extends BackendData {
     public toCityName: string;
     public dateStart: string;
     public dateEnd: string;
-    public children: number[] = [];
+    public flights: FlightData[] = [];
 
     public get formattedDateStart(): string {
         return this.dateStart;
@@ -99,6 +99,12 @@ export class FlightData extends BackendData {
     public get flightDisplayCode(): string {
         return `${this.airlineCode}-${this.id}`;
     }
+
+    public get children(): FlightData[] {
+        return this.flights;
+    }
+
+    public set children(flights: FlightData[]) {}
 }
 
 
@@ -108,7 +114,7 @@ export interface FlightsData {
 }
 
 
-export class DetailsData extends BackendData{
+export class DetailsData extends BackendData {
     public date: string;
     public order: number;
     public flights: FlightData[];
@@ -188,6 +194,8 @@ export class AllModels implements IModel {
             url += `&reverse=${reverse}`;
         }
 
+        url += '&connecting=true';
+
         return new Promise<FlightsData>((resolve, reject) => {
             this.jsonParser.parseURLAsync(
                 url,
@@ -195,13 +203,18 @@ export class AllModels implements IModel {
                 null,
                 { 'Content-Type': 'application/json' }
             ).then((flights: FlightsData) => {
+                const mapFlights = (flights: FlightData[]): FlightData[] => {
+                    return flights.map((flight: FlightData) => {
+                        const newFlight: FlightData = <FlightData> BackendData.Apply(new FlightData(), flight);
+                        newFlight.flights = mapFlights(newFlight.flights);
+
+                        return newFlight;
+                    });
+                };
+
                 resolve({
-                    flights: flights.flights.map(
-                        flight => <FlightData> BackendData.Apply(new FlightData(), flight)
-                    ),
-                    reverseFlights: flights.reverseFlights.map(
-                        flight => <FlightData> BackendData.Apply(new FlightData(), flight)
-                    ),
+                    flights: mapFlights(flights.flights),
+                    reverseFlights: mapFlights(flights.reverseFlights),
                 });
             }).catch((err) => {
                 reject(err);

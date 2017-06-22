@@ -30,7 +30,7 @@ public class Flight {
     private Object flightsQuery(int fromCity, int toCity, String date, boolean connecting) {
         if (connecting) {
             return this.jdbc.query(
-                    "SELECT * FROM connectingFlights(?, ?, ?::TIMESTAMPTZ)",
+                    "SELECT * FROM connectingFlights(?, ?, ?::TIMESTAMPTZ) LIMIT 10",
                     new FlightData(new String[] {"F1_", "F2_", "F3_"}),
                     fromCity, toCity, date
             );

@@ -49,44 +49,48 @@
     <br>
 
 
-    <view-for variable="flight" in="$.flights" class="flight-list">
+    <view-for variable="flight" in="$.flights" class="flight-list flights">
         <div class="flight">
-            <div class="flight-title-bar">
 
-                <div class="flight-title flight-inline">
-                    <view-eval value="flight.fromAirportCode"></view-eval>
-                    <i class="fa fa-long-arrow-right" aria-hidden="true"></i>
-                    <view-eval value="flight.toAirportCode"></view-eval>
+            <div class="flights-data" style="display: none;" x-data="${flight.flights.join(',')}"></div>
+
+            <view-for variable="f" in="flight.flights" static>
+
+                <div class="flight-title-bar">
+
+                    <div class="flight-title flight-inline">
+                        <view-eval value="f.fromAirportCode"></view-eval>
+                        <i class="fa fa-long-arrow-right" aria-hidden="true"></i>
+                        <view-eval value="f.toAirportCode"></view-eval>
+                    </div>
+
+                    <div class="flight-code">
+                        <view-eval value="f.flightDisplayCode"></view-eval>
+                    </div>
+
                 </div>
 
-                <div class="flight-code">
-                    <view-eval value="flight.flightDisplayCode"></view-eval>
+                <div class="flight-start flight-inline">
+                    <view-eval value="f.flightDisplayName"></view-eval>
                 </div>
 
-            </div>
+                <div class="flight-start flight-inline">
+                    <span class="flight-no-accent">Начало в</span>
+                    <view-eval value="f.formattedDateStart"></view-eval>
+                </div>
 
-            <div class="flight-start flight-inline">
-                <view-eval value="flight.flightDisplayName"></view-eval>
-            </div>
-
-            <div class="flight-start flight-inline">
-                <span class="flight-no-accent">Начало в</span>
-                <view-eval value="flight.formattedDateStart"></view-eval>
-            </div>
-
-            <div class="flight-end flight-inline">
-                <span class="flight-no-accent">Окончание в</span>
-                <view-eval value="flight.formattedDateEnd"></view-eval>
-            </div>
+                <div class="flight-end flight-inline">
+                    <span class="flight-no-accent">Окончание в</span>
+                    <view-eval value="f.formattedDateEnd"></view-eval>
+                </div>
+            </view-for>
 
 
+            <br>
             <div class="flight-data">
-                <view-if condition="flight.children.length > 0" static>
-                    <view-then>
-                        <link-to route="DetailsRoute" args="{id: flight.id}">
-                            Посмотреть данные стыковых рейсов
-                        </link-to>
-                    </view-then><view-else>Прямой рейс</view-else>
+                <view-if condition="flight.children.length > 1" static>
+                    <view-then>Несколько стыковых рейсов</view-then>
+                    <view-else>Прямой рейс</view-else>
                 </view-if>
             </div>
         </div>
@@ -99,45 +103,47 @@
     </view-if>
 
 
-    <view-for variable="flight" in="$.reverseFlights" class="reverse-flight-list">
+    <view-for variable="flight" in="$.reverseFlights" class="reverse-flight-list flights">
         <div class="flight">
-            <div class="flight-title-bar">
 
-                <div class="flight-title flight-inline">
-                    <view-eval value="flight.fromAirportCode"></view-eval>
-                    <i class="fa fa-long-arrow-right" aria-hidden="true"></i>
-                    <view-eval value="flight.toAirportCode"></view-eval>
+            <div class="flights-data" style="display: none;" x-data="${flight.flights.join(',')}"></div>
+
+            <view-for variable="f" in="flight.flights" static>
+                <div class="flight-title-bar">
+
+                    <div class="flight-title flight-inline">
+                        <view-eval value="f.fromAirportCode"></view-eval>
+                        <i class="fa fa-long-arrow-right" aria-hidden="true"></i>
+                        <view-eval value="f.toAirportCode"></view-eval>
+                    </div>
+
+                    <div class="flight-code">
+                        <view-eval value="f.flightDisplayCode"></view-eval>
+                    </div>
+
                 </div>
 
-                <div class="flight-code">
-                    <view-eval value="flight.flightDisplayCode"></view-eval>
+                <div class="flight-start flight-inline">
+                    <view-eval value="f.flightDisplayName"></view-eval>
                 </div>
 
-            </div>
+                <div class="flight-start flight-inline">
+                    <span class="flight-no-accent">Начало в</span>
+                    <view-eval value="f.formattedDateStart"></view-eval>
+                </div>
 
-            <div class="flight-start flight-inline">
-                <view-eval value="flight.flightDisplayName"></view-eval>
-            </div>
-
-            <div class="flight-start flight-inline">
-                <span class="flight-no-accent">Начало в</span>
-                <view-eval value="flight.formattedDateStart"></view-eval>
-            </div>
-
-            <div class="flight-end flight-inline">
-                <span class="flight-no-accent">Окончание в</span>
-                <view-eval value="flight.formattedDateEnd"></view-eval>
-            </div>
+                <div class="flight-end flight-inline">
+                    <span class="flight-no-accent">Окончание в</span>
+                    <view-eval value="f.formattedDateEnd"></view-eval>
+                </div>
+            </view-for>
 
 
             <br>
             <div class="flight-data">
-                <view-if condition="flight.children.length > 0" static>
-                    <view-then>
-                        <link-to route="DetailsRoute" args="{id: flight.id}">
-                            Посмотреть данные стыковых рейсов
-                        </link-to>
-                    </view-then><view-else>Прямой рейс</view-else>
+                <view-if condition="flight.children.length > 1" static>
+                    <view-then>Несколько стыковых рейсов</view-then>
+                    <view-else>Прямой рейс</view-else>
                 </view-if>
             </div>
         </div>
