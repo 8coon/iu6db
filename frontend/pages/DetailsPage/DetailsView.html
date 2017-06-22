@@ -1,0 +1,64 @@
+<app-view id="DetailsView" extends="BaseView">
+
+    <!--<div class="selector">
+        Выберите клиента: <span class="select"><select id="current-client"></select></span>
+    </div>
+
+    <view-component name="CalendarComponent" class="select-date"></view-component>
+
+    <view-for variable="order" in="$.orders" class="orders">
+
+        <div class="flight">
+            <div class="flight-title-bar">
+
+                <div class="flight-title flight-inline">
+                    <view-eval value="'#' + order.id"></view-eval>
+                </div>
+
+                <div class="flight-code flight-inline">
+                    <view-eval value="order.flightCode"></view-eval>
+                </div>
+
+            </div>
+
+            <div class="flight-from flight-inline">
+                <span class="flight-no-accent">Из</span>
+                <view-eval value="order.fromAirportName"></view-eval>
+            </div>
+
+            <div class="flight-to flight-inline">
+                <span class="flight-no-accent">В</span>
+                <view-eval value="order.toAirportName"></view-eval>
+            </div>
+
+            <div class="flight-start flight-inline">
+                <span class="flight-no-accent">Первый рейс в</span>
+                <view-eval value="order.formattedFlightStart"></view-eval>
+            </div>
+
+
+            <view-if condition="order.reverse == null" static>
+                <view-then></view-then>
+                <view-else>
+                    <div class="flight-reverse flight-inline">
+                        <span class="flight-no-accent">Обратный рейс: </span>
+                        <view-eval value="'Заказ № ' + order.reverse"></view-eval>
+                    </div>
+                </view-else>
+            </view-if>
+
+
+            <div class="flight-data">
+                <view-if condition="order.flight.length > 1" static>
+                    <view-then>
+                        <link-to route="DetailsRoute" args="{id: order.id}">
+                            Посмотреть данные стыковых рейсов
+                        </link-to>
+                    </view-then><view-else>Прямой рейс</view-else>
+                </view-if>
+            </div>
+        </div>
+
+    </view-for>-->
+
+</app-view>

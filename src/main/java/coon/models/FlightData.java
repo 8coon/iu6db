@@ -22,6 +22,8 @@ public class FlightData implements RowMapper<FlightData> {
     private String dateStart;
     private String dateEnd;
 
+    public String orderDate = null;
+
 
     public FlightData() {}
 
@@ -35,8 +37,14 @@ public class FlightData implements RowMapper<FlightData> {
         fd.setToAirportCode(resultSet.getString("toAirportCode"));
         fd.setAirlineName(resultSet.getString("airlineName"));
         fd.setAirlineCode(resultSet.getString("airlineCode"));
-        fd.setFromCityName(resultSet.getString("fromCityName"));
-        fd.setToCityName(resultSet.getString("toCityName"));
+
+        try {
+            fd.setFromCityName(resultSet.getString("fromCityName"));
+            fd.setToCityName(resultSet.getString("toCityName"));
+        } catch (SQLException e) {
+            fd.setFromCityName(resultSet.getString("fromAirportName"));
+            fd.setToCityName(resultSet.getString("toAirportName"));
+        }
 
         fd.setDateStart(LocalDateTime.ofInstant(
                 resultSet.getTimestamp("dateStart").toInstant(),
@@ -51,6 +59,17 @@ public class FlightData implements RowMapper<FlightData> {
         ).format(
                 DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS")
         ));
+
+        try {
+            fd.orderDate = LocalDateTime.ofInstant(
+                    resultSet.getTimestamp("orderDate").toInstant(),
+                    ZoneOffset.ofHours(0)
+            ).format(
+                    DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS")
+            );
+        } catch (SQLException e) {
+            fd.orderDate = null;
+        }
 
         return fd;
     }

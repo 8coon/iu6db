@@ -4,6 +4,7 @@ DROP VIEW IF EXISTS flightsFromCity;
 DROP VIEW IF EXISTS clientOrders;
 DROP VIEW IF EXISTS flightsFromCityToCity;
 DROP VIEW IF EXISTS clients;
+DROP VIEW IF EXISTS orderDetails;
 DROP TABLE IF EXISTS OrderFlights;
 DROP TABLE IF EXISTS Orders;
 DROP TABLE IF EXISTS Flights;
@@ -361,6 +362,32 @@ CREATE VIEW clients AS (
   ORDER BY
     id
 );
+
+
+CREATE VIEW orderDetails AS (
+  SELECT
+    "order", flight AS id,
+    Orders.date AS orderDate,
+    Flights.dateStart AS dateStart,
+    Flights.dateEnd AS dateEnd,
+    FromAirports.code AS fromAirportCode,
+    ToAirports.code AS toAirportCode,
+    FromAirports.name || ', '::TEXT || FromCity.name || ', ' || FromCity.country AS fromAirportName,
+    ToAirports.name || ', '::TEXT || ToCity.name || ', ' || ToCity.country AS toAirportName,
+    Airlines.name AS airlineName,
+    Airlines.code AS airlineCode
+  FROM
+    OrderFlights
+    JOIN Orders ON OrderFlights."order" = Orders.id
+    JOIN Flights ON OrderFlights.flight = Flights.id
+    JOIN Airports AS FromAirports ON Flights.fromAirport = FromAirports.id
+    JOIN Airports AS ToAirports ON Flights.toAirport = ToAirports.id
+    JOIN Cities AS FromCity ON FromAirports.city = FromCity.id
+    JOIN Cities AS ToCity ON ToAirports.city = ToCity.id
+    JOIN Airlines ON Flights.airline = Airlines.id
+  ORDER BY
+    dateStart
+)
 
 
 
