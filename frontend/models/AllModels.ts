@@ -87,8 +87,18 @@ export class FlightData extends BackendData {
     }
 
     public get flightDisplayName(): string {
-        return `${this.airlineName} ${this.airlineCode}-${this.id}`;
+        return this.airlineName;
     }
+
+    public get flightDisplayCode(): string {
+        return `${this.airlineCode}-${this.id}`;
+    }
+}
+
+
+export interface FlightsData {
+    flights: FlightData[];
+    reverseFlights: FlightData[];
 }
 
 
@@ -151,15 +161,28 @@ export class AllModels implements IModel {
     }
 
 
-    public flights(from: number, to: number, date: string): Promise<FlightData[]> {
-        return new Promise<FlightData[]>((resolve, reject) => {
+    public flights(from: number, to: number, date: string, reverse?: string): Promise<FlightsData> {
+        let url: string = `${JSWorks.config['backendURL']}/api/flights/list/?from=${from}&to=${to}&date=${date}`;
+
+        if (reverse !== undefined) {
+            url += `&reverse=${reverse}`;
+        }
+
+        return new Promise<FlightsData>((resolve, reject) => {
             this.jsonParser.parseURLAsync(
-                `${JSWorks.config['backendURL']}/api/flights/list/?from=${from}&to=${to}&date=${date}`,
+                url,
                 JSWorks.HTTPMethod.GET,
                 null,
                 { 'Content-Type': 'application/json' }
-            ).then((orders: any[]) => {
-                resolve(orders.map(order => <FlightData> BackendData.Apply(new FlightData(), order)));
+            ).then((flights: FlightsData) => {
+                resolve({
+                    flights: flights.flights.map(
+                        flight => <FlightData> BackendData.Apply(new FlightData(), flight)
+                    ),
+                    reverseFlights: flights.reverseFlights.map(
+                        flight => <FlightData> BackendData.Apply(new FlightData(), flight)
+                    ),
+                });
             }).catch((err) => {
                 reject(err);
             });
@@ -167,12 +190,24 @@ export class AllModels implements IModel {
     }
 
 
-    public createOrder(client: number, date: Date, flight: number, children: number[]): Promise<boolean> {
+    public createOrder(client: number, date: Date, reverseDate: Date, flight: number, children: number[],
+                reverseFlight: number, reverseChildren: number[]): Promise<boolean> {
+        let reverseDateString: string;
+        let reverseFlightArray: number[];
+
+        if (reverseDate !== undefined && reverseFlight !== undefined) {
+            reverseDateString = reverseDate.toISOString().replace(' ', 'T');
+            reverseFlightArray = [reverseFlight];
+        }
+
         return new Promise<boolean>((resolve, reject) => {
             this.jsonParser.parseURLAsync(
                 `${JSWorks.config['backendURL']}/api/client/${client}/orders/new`,
                 JSWorks.HTTPMethod.POST,
-                JSON.stringify({ date: date.toISOString().replace(' ', 'T'), flight: [flight] }),
+                JSON.stringify({
+                    date: date.toISOString().replace(' ', 'T'), flight: [flight],
+                    reverseDate: reverseDateString, reverseChildren: reverseFlightArray
+                }),
                 { 'Content-Type': 'application/json' }
             ).then(() => {
                 resolve(true);

@@ -30,6 +30,9 @@ public class OrderData implements RowMapper<OrderData> {
     private String toAirportCode;
     private String toAirportName;
 
+    public Integer[] reverseChildren;
+    public String reverseDate;
+
 
     @JsonCreator
     public OrderData(
@@ -37,13 +40,17 @@ public class OrderData implements RowMapper<OrderData> {
             @JsonProperty("client") int client,
             @JsonProperty("date") String date,
             @JsonProperty("flight") Integer[] flight,
-            @JsonProperty("reverse") Integer reverse
+            @JsonProperty("reverse") Integer reverse,
+            @JsonProperty("reverseChildren") Integer[] reverseChildren,
+            @JsonProperty("reverseDate") String reverseDate
     ) {
         this.id = id;
         this.client = client;
         this.date = date;
         this.flight = flight;
         this.reverse = reverse;
+        this.reverseChildren = reverseChildren;
+        this.reverseDate = reverseDate;
     }
 
     public OrderData() {}
@@ -61,7 +68,9 @@ public class OrderData implements RowMapper<OrderData> {
                         DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS")
                 ),
                 (Integer[]) resultSet.getArray("flight").getArray(),
-                (Integer) resultSet.getObject("reverse")
+                (Integer) resultSet.getObject("reverse"),
+                null,
+                null
         );
 
         order.setClientName(resultSet.getString("clientName"));

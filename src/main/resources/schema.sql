@@ -148,9 +148,9 @@ BEGIN
   errors := 0;
 
   FOR i IN 1..amount LOOP
-    dateStart := (SELECT TIMESTAMP ''2017-01-10 20:00:00'' +
-                         random() * (TIMESTAMP ''2017-03-20 20:00:00'' -
-                                     TIMESTAMP ''2017-01-10 10:00:00''));
+    dateStart := (SELECT TIMESTAMP ''2017-05-20 20:00:00'' +
+                         random() * (TIMESTAMP ''2017-05-20 20:00:00'' -
+                                     TIMESTAMP ''2017-06-10 10:00:00''));
     BEGIN
       INSERT INTO Flights (fromAirport, toAirport, dateStart, dateEnd, airline) VALUES
         (
@@ -307,6 +307,8 @@ CREATE VIEW clientOrders AS (
       JOIN Airports AS ToAirport ON LastFlight.toAirport = ToAirport.id
       JOIN Cities AS FromCity ON FromAirport.city = FromCity.id
       JOIN Cities AS ToCity ON ToAirport.city = ToCity.id
+    ORDER BY
+      date
 );
 
 

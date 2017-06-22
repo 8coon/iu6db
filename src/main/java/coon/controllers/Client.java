@@ -9,6 +9,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
@@ -16,6 +18,7 @@ import java.util.List;
 
 
 @RestController
+@Transactional(propagation = Propagation.REQUIRES_NEW)
 @RequestMapping("/api/client")
 public class Client {
 
@@ -32,20 +35,37 @@ public class Client {
             @PathVariable("id") int client,
             @RequestBody OrderData order
     ) {
-        List<String> strings = new ArrayList<String>();
+        Integer reverseId = null;
+
+        if (order.reverseChildren != null) {
+            ResponseEntity<Response> response = this.create(client, new OrderData(
+                    0,
+                    client,
+                    order.reverseDate,
+                    order.reverseChildren,
+                    null,
+                    null,
+                    null
+            ));
+
+            reverseId = response.getBody().id;
+        }
+
+        List<String> strings = new ArrayList<>();
 
         for (Integer flight: order.getFlight()) {
             strings.add(String.valueOf(flight));
         }
 
-        this.jdbc.update(
-                "INSERT INTO Orders (client, date, flight) VALUES (?, ?::TIMESTAMP, '{" +
-                        String.join(", ", strings.toArray(new String[] {})) + "}')",
-                client, order.getDate()
+        int id = this.jdbc.queryForObject(
+                "INSERT INTO Orders (client, date, flight, reverse) VALUES (?, ?::TIMESTAMP, '{" +
+                        String.join(", ", strings.toArray(new String[] {})) + "}', ?) RETURNING id",
+                Integer.class,
+                client, order.getDate(), reverseId
         );
 
         return new ResponseEntity<>(
-                new Response("success"),
+                new Response("success", id),
                 HttpStatus.OK
         );
     }

@@ -2,7 +2,7 @@ import {JSWorksLib} from "jsworks/dist/dts/jsworks";
 import {View} from "jsworks/dist/dts/View/View";
 import {SimpleVirtualDOMElement} from "jsworks/dist/dts/VirtualDOM/SimpleVirtualDOM/SimpleVirtualDOMElement";
 import {SimpleVirtualDOM} from "jsworks/dist/dts/VirtualDOM/SimpleVirtualDOM/SimpleVirtualDOM";
-import {AllModels, ClientData, OrderData, CityData, FlightData} from "../../models/AllModels";
+import {AllModels, ClientData, OrderData, CityData, FlightData, FlightsData} from "../../models/AllModels";
 import {NewOrderPage} from "./NewOrderPage";
 import {AbstractController} from "../AbstractController";
 import {CalendarComponent} from "../../components/CalendarComponent/CalendarComponent";
@@ -26,10 +26,13 @@ export class NewOrderController extends AbstractController {
         calendar.controller.updateCalendar();
         calendar.controller.hide();
 
+        const reverse: SimpleVirtualDOMElement = this.view.DOMRoot.querySelector('#reverse');
+        reverse.setStyleAttribute('display', 'none');
+
         const dateInputs: SimpleVirtualDOMElement[] = this.view.DOMRoot.querySelectorAll('.show-calendar');
         let activeInput: SimpleVirtualDOMElement;
 
-        dateInputs.forEach((dateInput: SimpleVirtualDOMElement) => {
+        dateInputs.forEach((dateInput: SimpleVirtualDOMElement, i: number) => {
             dateInput.removeEventListeners('focus');
             dateInput.addEventListener('focus', () => {
                 const boundingRect = (<HTMLElement> dateInput.rendered).getBoundingClientRect();
@@ -37,6 +40,10 @@ export class NewOrderController extends AbstractController {
                 calendar.controller.setDate((<any> dateInput.rendered).value);
                 calendar.controller.show(boundingRect.left, boundingRect.top);
                 activeInput = dateInput;
+
+                if (i === 2) {
+                    reverse.setStyleAttribute('display', 'inherit');
+                }
             });
 
         });
@@ -67,7 +74,7 @@ export class NewOrderController extends AbstractController {
 
         fromSelect.removeEventListeners();
         fromSelect.addEventListener('change', () => {
-            this.checkReady(select, fromSelect, toSelect, dateInputs[0], dateInputs[1]);
+            this.checkReady(select, fromSelect, toSelect, dateInputs[0], dateInputs[1], dateInputs[2]);
         });
 
 
@@ -76,7 +83,7 @@ export class NewOrderController extends AbstractController {
 
         toSelect.removeEventListeners();
         toSelect.addEventListener('change', () => {
-            this.checkReady(select, fromSelect, toSelect, dateInputs[0], dateInputs[1]);
+            this.checkReady(select, fromSelect, toSelect, dateInputs[0], dateInputs[1], dateInputs[2]);
         });
 
 
@@ -98,27 +105,20 @@ export class NewOrderController extends AbstractController {
             activeInput.rendered['value'] = date.toDateString();
             activeInput.rendered.dispatchEvent(new Event('change'));
             activeInput.setAttribute('value', date.toDateString());
-            this.checkReady(select, fromSelect, toSelect, dateInputs[0], dateInputs[1]);
+            this.checkReady(select, fromSelect, toSelect, dateInputs[0], dateInputs[1], dateInputs[2]);
         };
 
         select.addEventListener('change', () => {
-            this.checkReady(select, fromSelect, toSelect, dateInputs[0], dateInputs[1]);
+            this.checkReady(select, fromSelect, toSelect, dateInputs[0], dateInputs[1], dateInputs[2]);
         });
-
-        const reverse: SimpleVirtualDOMElement = this.view.DOMRoot.querySelector('#reverse');
 
         reverse.removeEventListeners();
         reverse.addEventListener('click', () => {
-            const from = (<any> fromSelect.rendered).value;
-            const to = (<any> toSelect.rendered).value;
+            (<any> dateInputs[2].rendered).value = '';
+            dateInputs[2].setAttribute('value', '');
+            reverse.setStyleAttribute('display', 'none');
 
-            (<any> fromSelect.rendered).value = to;
-            (<any> toSelect.rendered).value = from;
-
-            fromSelect.setAttribute('value', to);
-            toSelect.setAttribute('value', from);
-
-            this.checkReady(select, fromSelect, toSelect, dateInputs[0], dateInputs[1]);
+            this.checkReady(select, fromSelect, toSelect, dateInputs[0], dateInputs[1], dateInputs[2]);
         });
     }
 
@@ -128,10 +128,17 @@ export class NewOrderController extends AbstractController {
         fromCitySelect: SimpleVirtualDOMElement,
         toCitySelect: SimpleVirtualDOMElement,
         orderDateInput: SimpleVirtualDOMElement,
-        flightDateInput: SimpleVirtualDOMElement
+        flightDateInput: SimpleVirtualDOMElement,
+        reverseDateFlight: SimpleVirtualDOMElement
     ) {
         const value = (item: SimpleVirtualDOMElement): string => (<any> item.rendered).value;
         this.component.error = '';
+
+        let reverse: string;
+
+        if (value(reverseDateFlight).length > 0) {
+            reverse = new Date(value(reverseDateFlight)).toISOString().replace(' ', 'T');
+        }
 
         if (!(
             value(userSelect) !== 'Выберите клиента:' &&
@@ -155,16 +162,97 @@ export class NewOrderController extends AbstractController {
             return;
         }
 
+        const reverseDate: Date = new Date(reverse);
+        reverseDate.setDate(reverseDate.getDate() - 1);
+
+        if (reverseDate < new Date(value(flightDateInput))) {
+            this.component.error = 'Обратный перелёт не может быть раньше прямого!';
+            return;
+        }
+
 
         this.net.flights(
             this.net.idByDisplay(value(fromCitySelect)),
             this.net.idByDisplay(value(toCitySelect)),
             new Date(value(flightDateInput)).toISOString().replace(' ', 'T'),
-        ).then((flights: FlightData[]) => {
-            this.component.flights = flights;
+            reverse
+        ).then((flights: FlightsData) => {
+            this.component.flights = flights.flights;
+            this.component.reverseFlights = flights.reverseFlights;
 
             window.setTimeout(() => {
-                const buttons: SimpleVirtualDOMElement[] = this.view.DOMRoot.querySelectorAll('.order-button');
+                const patchFlights = (rootClass: string) => {
+                    const root: SimpleVirtualDOMElement = this.view.DOMRoot.querySelector(`.${rootClass}`);
+                    const flights: SimpleVirtualDOMElement[] = root.querySelectorAll('.flight');
+
+                    flights.forEach((flight: SimpleVirtualDOMElement) => {
+                        flight.toggleClass('flight-selected', false);
+
+                        flight.removeEventListeners();
+                        flight.addEventListener('click', () => {
+                            flights.forEach((flight: SimpleVirtualDOMElement) => {
+                                flight.toggleClass('flight-selected', false);
+                            });
+
+                            flight.toggleClass('flight-selected', true);
+                        })
+                    });
+                };
+
+                patchFlights('flight-list');
+                patchFlights('reverse-flight-list');
+
+
+                const button: SimpleVirtualDOMElement = this.view.DOMRoot.querySelector('#order');
+
+                button.removeEventListeners();
+                button.addEventListener('click', () => {
+                    const parseId = (rootClass: string): number => {
+                        const root: SimpleVirtualDOMElement = this.view.DOMRoot.querySelector(`.${rootClass}`);
+                        const flight: SimpleVirtualDOMElement = root.querySelector('.flight-selected');
+
+                        if (flight) {
+                            return parseInt(flight.querySelector('.flight-code').querySelector('view-eval')
+                                    .children.item(0).text.split('-')[1], 10);
+                        }
+
+                        return undefined;
+                    };
+
+                    let reverseDate: Date;
+
+                    if (value(reverseDateFlight).length > 0) {
+                        reverseDate = new Date(value(reverseDateFlight));
+                    }
+
+                    button.addEventListener('click', () => {
+                        this.net.createOrder(
+                            this.net.idByDisplay(value(userSelect)),
+                            new Date(value(orderDateInput)),
+                            reverseDate,
+                            parseId('flight-list'),
+                            [],
+                            parseId('reverse-flight-list'),
+                            []
+                        ).then((success: boolean) => {
+                            if (success) {
+                                alert('Заказ успешно добавлен.');
+
+                                JSWorks.applicationContext.router.navigate(
+                                    JSWorks.applicationContext.routeHolder.getRoute('OrdersRoute'),
+                                    {},
+                                )
+                            } else {
+                                alert('Ошибка добалвения заказа.')
+                            }
+                        }).catch((err) => {
+                            alert(`Ошибка: ${err}`);
+                        });
+                    });
+
+                });
+
+                /*const buttons: SimpleVirtualDOMElement[] = this.view.DOMRoot.querySelectorAll('.order-button');
 
                 buttons.forEach((button: SimpleVirtualDOMElement) => {
                     button.removeEventListeners();
@@ -189,7 +277,7 @@ export class NewOrderController extends AbstractController {
                             alert(`Ошибка: ${err}`);
                         });
                     });
-                });
+                });*/
             }, 10);
         });
     }

@@ -12,6 +12,9 @@ export class NewOrderPage {
     @(<any> JSWorks.ComponentCollectionProperty())
     public flights: FlightData[] = [];
 
+    @(<any> JSWorks.ComponentCollectionProperty())
+    public reverseFlights: FlightData[] = [];
+
     @(<any> JSWorks.ComponentProperty())
     public error: string = '';
 
