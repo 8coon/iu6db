@@ -183,3 +183,26 @@ input {
     background-color: rgb(220, 220, 220);
 }
 
+
+@media print {
+
+    .header {
+        display: none !important;
+    }
+
+    body {
+        font-family: "Times New Roman", serif;
+        padding: 0;
+        color: black !important;
+    }
+
+    button {
+        visibility: hidden !important;
+    }
+
+    .flight {
+        border: 1px solid black !important;
+    }
+
+}
+
