@@ -9,11 +9,11 @@ import java.util.List;
 
 public class FlightsListResponse {
 
-    private List<FlightData> flights;
-    private List<FlightData> reverseFlights;
+    private Object flights;
+    private Object reverseFlights;
 
 
-    public FlightsListResponse(List<FlightData> flights, List<FlightData> reverseFlights) {
+    public FlightsListResponse(Object flights, Object reverseFlights) {
         if (flights == null) {
             flights = new ArrayList<>();
         }
@@ -27,19 +27,19 @@ public class FlightsListResponse {
     }
 
 
-    public List<FlightData> getFlights() {
+    public Object getFlights() {
         return flights;
     }
 
-    public void setFlights(List<FlightData> flights) {
+    public void setFlights(Object flights) {
         this.flights = flights;
     }
 
-    public List<FlightData> getReverseFlights() {
+    public Object getReverseFlights() {
         return reverseFlights;
     }
 
-    public void setReverseFlights(List<FlightData> reverseFlights) {
+    public void setReverseFlights(Object reverseFlights) {
         this.reverseFlights = reverseFlights;
     }
 
