@@ -4,21 +4,20 @@ import {SimpleVirtualDOMElement} from "jsworks/dist/dts/VirtualDOM/SimpleVirtual
 import {SimpleVirtualDOM} from "jsworks/dist/dts/VirtualDOM/SimpleVirtualDOM/SimpleVirtualDOM";
 import {AllModels, ClientData, OrderData} from "../../models/AllModels";
 import {OrdersPage} from "./OrdersPage";
+import {AbstractController} from "../AbstractController";
 
 
 declare const JSWorks: JSWorksLib;
 
 
 @JSWorks.Controller
-export class OrdersController {
+export class OrdersController extends AbstractController {
 
-    public view: View;
     public component: OrdersPage;
-    public net: AllModels;
 
 
     public onNavigate(args: object): void {
-        this.net = <AllModels> JSWorks.applicationContext.modelHolder.getModel('AllModels');
+        super.onNavigate(args);
 
         const virtualDOM: SimpleVirtualDOM = JSWorks.applicationContext.serviceHolder
                 .getServiceByName('SimpleVirtualDOM');

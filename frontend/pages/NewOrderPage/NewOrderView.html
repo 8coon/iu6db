@@ -1,3 +1,30 @@
-<app-view id="NewOrderView">
-    <h1>It Works!</h1>
+<app-view id="NewOrderView" extends="BaseView">
+
+    <h2>Добавление заказа</h2>
+
+    <view-component name="CalendarComponent" class="select-date"></view-component>
+
+
+    <div class="selector">
+        <span class="label">Клиент:</span> <span class="select"><select id="current-client"></select></span>
+    </div>
+
+    <div class="selector">
+        <span class="label">Дата заказа:</span> <input id="order-date" class="show-calendar" readonly="readonly"
+                            placeholder="Нажмите для выбора...">
+    </div>
+
+    <div class="selector">
+        <span class="label">Дата вылета:</span> <input id="flight-date" class="show-calendar" readonly="readonly"
+                            placeholder="Нажмите для выбора...">
+    </div>
+
+    <div class="selector">
+        <span class="label">Город вылета:</span> <span class="select"><select id="from-city"></select></span>
+    </div>
+
+    <div class="selector">
+        <span class="label">Город прилёта:</span> <span class="select"><select id="to-city"></select></span>
+    </div>
+
 </app-view>

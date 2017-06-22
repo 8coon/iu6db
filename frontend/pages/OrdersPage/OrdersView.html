@@ -1,16 +1,10 @@
-<app-view id="OrdersView">
+<app-view id="OrdersView" extends="BaseView">
 
-    <div class="header">
-        <h1>
-            бронирование авиабилетов
-        </h1>
-
-        <button type="button" id="new-order">Забронировать</button>
+    <div class="selector">
+        Выберите клиента: <span class="select"><select id="current-client"></select></span>
     </div>
 
-    <div class="client-selector">
-        Выберите клиента: <select id="current-client"></select>
-    </div>
+    <view-component name="CalendarComponent" class="select-date"></view-component>
 
     <view-for variable="order" in="$.orders" class="orders">
 
