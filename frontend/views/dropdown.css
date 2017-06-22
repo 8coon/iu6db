@@ -1,0 +1,17 @@
+
+
+ul.dropdown:after {
+    content: "";
+    clear: both;
+    display: block;
+}
+
+
+ul.dropdown:after li {
+    display: none;
+}
+
+
+ul.dropdown:active li {
+    display: inline-block;
+}

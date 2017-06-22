@@ -1,0 +1,9 @@
+<app-view id="OrdersView">
+
+    Выберите клиента: <select id="current-client"></select>
+
+    <view-for variable="order" in="$.orders">
+        <view-eval value="JSON.stringify(order)"></view-eval>
+    </view-for>
+
+</app-view>

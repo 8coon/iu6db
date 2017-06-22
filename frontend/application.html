@@ -30,7 +30,10 @@
         <app-routes>
 
             <app-route id="MainRoute" page="TestPage" default></app-route>
-            <app-route id="NewOrderRoute" page="NewOrderPage" match="new"></app-route>
+
+            <app-route id="OrdersRoute" page="OrdersPage" match="orders">
+                <app-route id="NewOrderRoute" page="NewOrderPage" match="new"></app-route>
+            </app-route>
 
         </app-routes>
     </app-info>

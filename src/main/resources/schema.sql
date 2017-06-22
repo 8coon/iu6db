@@ -3,6 +3,7 @@
 DROP VIEW IF EXISTS flightsFromCity;
 DROP VIEW IF EXISTS clientOrders;
 DROP VIEW IF EXISTS flightsFromCityToCity;
+DROP VIEW IF EXISTS clients;
 DROP TABLE IF EXISTS Orders;
 DROP TABLE IF EXISTS Flights;
 DROP TABLE IF EXISTS Airports;
@@ -288,26 +289,22 @@ CREATE VIEW clientOrders AS (
     SELECT
       Orders.id AS id, client, date, flight, reverse,
       (Users.lastName || ' '::TEXT || Users.firstName || ' '::TEXT || Users.midName) AS clientName,
-      Flights.id AS flightId,
-      Flights.dateStart AS flightStart,
-      Flights.dateEnd AS flightEnd,
+      FirstFlight.id AS flightId,
+      FirstFlight.dateStart AS flightStart,
       Airlines.code AS airlineCode,
       Airlines.name AS airlineName,
       FromAirport.code AS fromAirportCode,
-      FromAirport.name AS fromAirportName,
+      FromAirport.name || ', '::TEXT || FromCity.name || ', ' || FromCity.country AS fromAirportName,
       ToAirport.code AS toAirportCode,
-      ToAirport.name AS toAirportName,
-      FromCity.name AS fromCityName,
-      FromCity.country AS fromCityCountry,
-      ToCity.name AS toCityName,
-      ToCity.country AS toCityCountry
+      ToAirport.name || ', '::TEXT || ToCity.name || ', ' || ToCity.country AS toAirportName
     FROM
       Orders
       JOIN Users ON Orders.client = Users.id
-      JOIN Flights ON Orders.flight[1] = Flights.id
-      JOIN Airlines ON Flights.airline = Airlines.id
-      JOIN Airports AS FromAirport ON Flights.fromAirport = FromAirport.id
-      JOIN Airports AS ToAirport ON Flights.toAirport = ToAirport.id
+      JOIN Flights AS FirstFlight ON Orders.flight[1] = FirstFlight.id
+      JOIN Flights AS LastFlight ON Orders.flight[array_length(Orders.flight, 1)] = LastFlight.id
+      JOIN Airlines ON FirstFlight.airline = Airlines.id
+      JOIN Airports AS FromAirport ON FirstFlight.fromAirport = FromAirport.id
+      JOIN Airports AS ToAirport ON LastFlight.toAirport = ToAirport.id
       JOIN Cities AS FromCity ON FromAirport.city = FromCity.id
       JOIN Cities AS ToCity ON ToAirport.city = ToCity.id
 );
@@ -332,6 +329,16 @@ CREATE VIEW flightsFromCityToCity AS (
     JOIN Cities AS ToCity ON ToAirports.city = ToCity.id
   ORDER BY
     duration ASC
+);
+
+
+CREATE VIEW clients AS (
+  SELECT
+    id, (lastName || ' '::TEXT || firstName || ' '::TEXT || midName) AS name
+  FROM
+    Users
+  ORDER BY
+    id
 );
 
 
