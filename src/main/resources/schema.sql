@@ -317,7 +317,7 @@ CREATE VIEW clientOrders AS (
     (
       SELECT
         Orders.id AS id, client, date, reverse,
-        array_agg((SELECT flight FROM OrderFlights WHERE "order" = Orders.id)) AS flights
+        array((SELECT flight FROM OrderFlights WHERE "order" = Orders.id)) AS flights
       FROM
         Orders
       GROUP BY
@@ -512,7 +512,7 @@ BEGIN
       LEFT OUTER JOIN flightsFromCity AS F1 ON F1.id = t.F1_id
       LEFT OUTER JOIN flightsFromCity AS F2 ON F2.id = t.F2_id
       LEFT OUTER JOIN flightsFromCity AS F3 ON F3.id = t.F3_id
-    ORDER BY F1.duration, F2.duration, F3.duration
+    ORDER BY t.length, F1.duration + F2.duration + F3.duration
   );
 END;' LANGUAGE plpgsql;
 

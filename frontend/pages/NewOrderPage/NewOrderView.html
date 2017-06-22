@@ -52,7 +52,8 @@
     <view-for variable="flight" in="$.flights" class="flight-list flights">
         <div class="flight">
 
-            <div class="flights-data" style="display: none;" x-data="${flight.flights.join(',')}"></div>
+            <div class="flights-data" style="display: none;" x-data="${flight.flights.map(x => x.id).join(',')}">
+            </div>
 
             <view-for variable="f" in="flight.flights" static>
 
@@ -106,7 +107,8 @@
     <view-for variable="flight" in="$.reverseFlights" class="reverse-flight-list flights">
         <div class="flight">
 
-            <div class="flights-data" style="display: none;" x-data="${flight.flights.join(',')}"></div>
+            <div class="flights-data" style="display: none;" x-data="${flight.flights.map(x => x.id).join(',')}">
+            </div>
 
             <view-for variable="f" in="flight.flights" static>
                 <div class="flight-title-bar">

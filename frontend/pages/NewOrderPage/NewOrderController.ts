@@ -220,11 +220,24 @@ export class NewOrderController extends AbstractController {
                     return undefined;
                 };
 
+                const parseChildren = (rootClass: string): number[] => {
+                    const root: SimpleVirtualDOMElement = this.view.DOMRoot.querySelector(`.${rootClass}`);
+                    const flight: SimpleVirtualDOMElement = root.querySelector('.flight-selected');
+
+                    if (flight) {
+                        return flight.querySelector('.flights-data').getAttribute('x-data').split(',')
+                                .map(x => (console.log(x), parseInt(x, 10)));
+                    }
+
+                    return undefined;
+                };
+
                 let reverseDate: Date;
 
                 if (value(reverseDateFlight).length > 0) {
                     reverseDate = new Date(value(reverseDateFlight));
                 }
+
 
                 button.addEventListener('click', () => {
                     this.net.createOrder(
@@ -232,9 +245,9 @@ export class NewOrderController extends AbstractController {
                         new Date(value(orderDateInput)),
                         reverseDate,
                         parseId('flight-list'),
-                        [],
+                        parseChildren('flight-list'),
                         parseId('reverse-flight-list'),
-                        []
+                        parseChildren('reverse-flight-list')
                     ).then((success: boolean) => {
                         if (success) {
                             alert('Заказ успешно добавлен.');

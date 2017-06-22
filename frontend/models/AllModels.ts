@@ -237,7 +237,7 @@ export class AllModels implements IModel {
 
         if (reverseDate !== undefined && reverseFlight !== undefined) {
             reverseDateString = reverseDate.toISOString().replace(' ', 'T');
-            reverseFlightArray = [reverseFlight];
+            reverseFlightArray = reverseChildren;
         }
 
         return new Promise<boolean>((resolve, reject) => {
@@ -245,7 +245,7 @@ export class AllModels implements IModel {
                 `${JSWorks.config['backendURL']}/api/client/${client}/orders/new`,
                 JSWorks.HTTPMethod.POST,
                 JSON.stringify({
-                    date: date.toISOString().replace(' ', 'T'), flight: [flight],
+                    date: date.toISOString().replace(' ', 'T'), flight: children,
                     reverseDate: reverseDateString, reverseChildren: reverseFlightArray
                 }),
                 { 'Content-Type': 'application/json' }
