@@ -26,6 +26,16 @@ export class AbstractController {
                 {},
             )
         });
+
+        const h1: SimpleVirtualDOMElement = this.view.DOMRoot.querySelector('h1');
+        h1.removeEventListeners();
+
+        h1.addEventListener('click', () => {
+            JSWorks.applicationContext.router.navigate(
+                JSWorks.applicationContext.routeHolder.getRoute('OrdersRoute'),
+                {},
+            )
+        });
     }
 
 }

@@ -1,6 +1,6 @@
 'use strict';
 import {JSWorksLib} from "jsworks/dist/dts/jsworks";
-import {ClientData, OrderData} from "../../models/AllModels";
+import {ClientData, OrderData, FlightData} from "../../models/AllModels";
 
 
 declare const JSWorks: JSWorksLib;
@@ -10,6 +10,9 @@ declare const JSWorks: JSWorksLib;
 export class NewOrderPage {
 
     @(<any> JSWorks.ComponentCollectionProperty())
-    public orders: OrderData[] = [];
+    public flights: FlightData[] = [];
+
+    @(<any> JSWorks.ComponentProperty())
+    public error: string = '';
 
 }

@@ -27,4 +27,55 @@
         <span class="label">Город прилёта:</span> <span class="select"><select id="to-city"></select></span>
     </div>
 
+
+    <view-for variable="text" in="[$.error]">
+        <view-eval value="text" class="form-error"></view-eval>
+    </view-for>
+
+    <br>
+
+
+    <view-for variable="flight" in="$.flights">
+        <div class="flight">
+            <div class="flight-title-bar">
+
+                <div class="flight-title flight-inline">
+                    <view-eval value="flight.fromAirportCode"></view-eval>
+                    <i class="fa fa-long-arrow-right" aria-hidden="true"></i>
+                    <view-eval value="flight.toAirportCode"></view-eval>
+                </div>
+
+                <div class="flight-code">
+                    <button type="button" id="order-${flight.id}" class="order-button">Забронировать</button>
+                </div>
+
+            </div>
+
+            <div class="flight-start flight-inline">
+                <view-eval value="flight.flightDisplayName"></view-eval>
+            </div>
+
+            <div class="flight-start flight-inline">
+                <span class="flight-no-accent">Начало в</span>
+                <view-eval value="flight.formattedDateStart"></view-eval>
+            </div>
+
+            <div class="flight-end flight-inline">
+                <span class="flight-no-accent">Окончание в</span>
+                <view-eval value="flight.formattedDateEnd"></view-eval>
+            </div>
+
+
+            <div class="flight-data">
+                <view-if condition="flight.children.length > 0" static>
+                    <view-then>
+                        <link-to route="DetailsRoute" args="{id: flight.id}">
+                            Посмотреть данные стыковых рейсов
+                        </link-to>
+                    </view-then><view-else>Прямой рейс</view-else>
+                </view-if>
+            </div>
+        </div>
+    </view-for>
+
 </app-view>

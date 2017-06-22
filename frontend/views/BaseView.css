@@ -12,6 +12,7 @@
 body {
     padding-left: 200px;
     padding-right: 200px;
+    padding-bottom: 150px;
 }
 
 
@@ -140,5 +141,19 @@ input {
     padding-left: 10px;
     border-radius: 0;
     -webkit-appearance: none;
+}
+
+
+.flight-code button {
+    font-size: 50%;
+    padding: 10px;
+}
+
+
+.form-error {
+    text-align: center;
+    color: darkred;
+    font-weight: 200;
+    opacity: 0.8;
 }
 

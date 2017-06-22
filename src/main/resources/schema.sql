@@ -175,7 +175,7 @@ END;' LANGUAGE plpgsql;
 CREATE OR REPLACE FUNCTION generateOrders(amount INT) RETURNS VOID AS 'BEGIN
   FOR i IN 1..amount LOOP
     CREATE TEMPORARY TABLE flight AS
-      (SELECT * FROM Flights OFFSET floor(random() * (SELECT count(*) FROM Users)) LIMIT 1);
+      (SELECT * FROM Flights OFFSET floor(random() * (SELECT count(*) FROM Flights)) LIMIT 1);
 
     INSERT INTO Orders (client, date, flight) VALUES
       (
@@ -260,7 +260,7 @@ SELECT generateCities();
 SELECT generateAirports();
 SELECT generateAirlines();
 SELECT generateFlights(10000);
-SELECT generateUsers(50);
+SELECT generateUsers(10);
 SELECT generateOrders(10);
 
 

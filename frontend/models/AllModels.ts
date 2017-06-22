@@ -66,6 +66,32 @@ export class CityData extends BackendData {
 }
 
 
+export class FlightData extends BackendData {
+    public id: number;
+    public fromAirportCode: string;
+    public toAirportCode: string;
+    public airlineName: string;
+    public airlineCode: string;
+    public fromCityName: string;
+    public toCityName: string;
+    public dateStart: string;
+    public dateEnd: string;
+    public children: number[] = [];
+
+    public get formattedDateStart(): string {
+        return this.dateStart;
+    }
+
+    public get formattedDateEnd(): string {
+        return this.dateEnd;
+    }
+
+    public get flightDisplayName(): string {
+        return `${this.airlineName} ${this.airlineCode}-${this.id}`;
+    }
+}
+
+
 @JSWorks.Model
 export class AllModels implements IModel {
 
@@ -83,7 +109,7 @@ export class AllModels implements IModel {
                 `${JSWorks.config['backendURL']}/api/client/${clientId}/orders`,
                 JSWorks.HTTPMethod.GET,
                 null,
-                { 'Content-Type': 'application/jsonParser' }
+                { 'Content-Type': 'application/json' }
             ).then((orders: any[]) => {
                 resolve(orders.map(order => <OrderData> BackendData.Apply(new OrderData(), order)));
             }).catch((err) => {
@@ -99,7 +125,7 @@ export class AllModels implements IModel {
                 `${JSWorks.config['backendURL']}/api/client/list`,
                 JSWorks.HTTPMethod.GET,
                 null,
-                { 'Content-Type': 'application/jsonParser' }
+                { 'Content-Type': 'application/json' }
             ).then((orders: any[]) => {
                 resolve(orders.map(order => <ClientData> BackendData.Apply(new ClientData(), order)));
             }).catch((err) => {
@@ -115,9 +141,41 @@ export class AllModels implements IModel {
                 `${JSWorks.config['backendURL']}/api/client/cities`,
                 JSWorks.HTTPMethod.GET,
                 null,
-                { 'Content-Type': 'application/jsonParser' }
+                { 'Content-Type': 'application/json' }
             ).then((orders: any[]) => {
                 resolve(orders.map(order => <CityData> BackendData.Apply(new CityData(), order)));
+            }).catch((err) => {
+                reject(err);
+            });
+        });
+    }
+
+
+    public flights(from: number, to: number, date: string): Promise<FlightData[]> {
+        return new Promise<FlightData[]>((resolve, reject) => {
+            this.jsonParser.parseURLAsync(
+                `${JSWorks.config['backendURL']}/api/flights/list/?from=${from}&to=${to}&date=${date}`,
+                JSWorks.HTTPMethod.GET,
+                null,
+                { 'Content-Type': 'application/json' }
+            ).then((orders: any[]) => {
+                resolve(orders.map(order => <FlightData> BackendData.Apply(new FlightData(), order)));
+            }).catch((err) => {
+                reject(err);
+            });
+        });
+    }
+
+
+    public createOrder(client: number, date: Date, flight: number, children: number[]): Promise<boolean> {
+        return new Promise<boolean>((resolve, reject) => {
+            this.jsonParser.parseURLAsync(
+                `${JSWorks.config['backendURL']}/api/client/${client}/orders/new`,
+                JSWorks.HTTPMethod.POST,
+                JSON.stringify({ date: date.toISOString().replace(' ', 'T'), flight: [flight] }),
+                { 'Content-Type': 'application/json' }
+            ).then(() => {
+                resolve(true);
             }).catch((err) => {
                 reject(err);
             });

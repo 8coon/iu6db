@@ -2,7 +2,7 @@ import {JSWorksLib} from "jsworks/dist/dts/jsworks";
 import {View} from "jsworks/dist/dts/View/View";
 import {SimpleVirtualDOMElement} from "jsworks/dist/dts/VirtualDOM/SimpleVirtualDOM/SimpleVirtualDOMElement";
 import {SimpleVirtualDOM} from "jsworks/dist/dts/VirtualDOM/SimpleVirtualDOM/SimpleVirtualDOM";
-import {AllModels, ClientData, OrderData, CityData} from "../../models/AllModels";
+import {AllModels, ClientData, OrderData, CityData, FlightData} from "../../models/AllModels";
 import {NewOrderPage} from "./NewOrderPage";
 import {AbstractController} from "../AbstractController";
 import {CalendarComponent} from "../../components/CalendarComponent/CalendarComponent";
@@ -41,27 +41,12 @@ export class NewOrderController extends AbstractController {
 
         });
 
-        calendar.controller.onSelect = (calendar: CalendarComponent, date: Date) => {
-            activeInput.rendered['value'] = date.toDateString();
-            activeInput.rendered.dispatchEvent(new Event('change'));
-            activeInput.setAttribute('value', date.toDateString());
-        };
-
         const virtualDOM: SimpleVirtualDOM = JSWorks.applicationContext.serviceHolder
                 .getServiceByName('SimpleVirtualDOM');
 
 
         const select: SimpleVirtualDOMElement = this.view.DOMRoot.querySelector('#current-client');
         select.removeChildren();
-
-        select.removeEventListeners();
-        select.addEventListener('change', () => {
-            const clientDisplay: string = (<HTMLSelectElement> select.rendered).value;
-
-            this.net.clientOrders(this.net.idByDisplay(clientDisplay)).then((orders: OrderData[]) => {
-                this.component.orders = orders;
-            });
-        });
 
 
         this.net.clients().then((clients: ClientData[]) => {
@@ -82,7 +67,7 @@ export class NewOrderController extends AbstractController {
 
         fromSelect.removeEventListeners();
         fromSelect.addEventListener('change', () => {
-            // ToDo: validate
+            this.checkReady(select, fromSelect, toSelect, dateInputs[0], dateInputs[1]);
         });
 
 
@@ -91,7 +76,7 @@ export class NewOrderController extends AbstractController {
 
         toSelect.removeEventListeners();
         toSelect.addEventListener('change', () => {
-            // ToDo: validate
+            this.checkReady(select, fromSelect, toSelect, dateInputs[0], dateInputs[1]);
         });
 
 
@@ -109,6 +94,88 @@ export class NewOrderController extends AbstractController {
             });
         });
 
+        calendar.controller.onSelect = (calendar: CalendarComponent, date: Date) => {
+            activeInput.rendered['value'] = date.toDateString();
+            activeInput.rendered.dispatchEvent(new Event('change'));
+            activeInput.setAttribute('value', date.toDateString());
+            this.checkReady(select, fromSelect, toSelect, dateInputs[0], dateInputs[1]);
+        };
+
+        select.addEventListener('change', () => {
+            this.checkReady(select, fromSelect, toSelect, dateInputs[0], dateInputs[1]);
+        });
+    }
+
+
+    private checkReady(
+        userSelect: SimpleVirtualDOMElement,
+        fromCitySelect: SimpleVirtualDOMElement,
+        toCitySelect: SimpleVirtualDOMElement,
+        orderDateInput: SimpleVirtualDOMElement,
+        flightDateInput: SimpleVirtualDOMElement
+    ) {
+        const value = (item: SimpleVirtualDOMElement): string => (<any> item.rendered).value;
+        this.component.error = '';
+
+        if (!(
+            value(userSelect) !== 'Выберите клиента:' &&
+            value(fromCitySelect) !== 'Выберите город:' &&
+            value(toCitySelect) !== 'Выберите город:' &&
+            value(orderDateInput) != '' &&
+            value(flightDateInput) != ''
+        )) {
+            this.component.flights = [];
+            return;
+        }
+
+        if (new Date(value(orderDateInput)) > new Date(value(flightDateInput))) {
+            this.component.error = 'Нельзя бронировать билеты на рейс после его вылета! ' +
+                'Укажите другое время путешествия.';
+            return;
+        }
+
+        if (value(fromCitySelect) === value(toCitySelect)) {
+            this.component.error = 'Город отправления и город прибытия должны совпадать!';
+            return;
+        }
+
+
+        this.net.flights(
+            this.net.idByDisplay(value(fromCitySelect)),
+            this.net.idByDisplay(value(toCitySelect)),
+            new Date(value(flightDateInput)).toISOString().replace(' ', 'T'),
+        ).then((flights: FlightData[]) => {
+            this.component.flights = flights;
+
+            window.setTimeout(() => {
+                const buttons: SimpleVirtualDOMElement[] = this.view.DOMRoot.querySelectorAll('.order-button');
+
+                buttons.forEach((button: SimpleVirtualDOMElement) => {
+                    button.removeEventListeners();
+                    button.addEventListener('click', () => {
+                        this.net.createOrder(
+                            this.net.idByDisplay(value(userSelect)),
+                            new Date(value(orderDateInput)),
+                            parseInt(button.id.split('-')[1], 10),
+                            []
+                        ).then((success: boolean) => {
+                            if (success) {
+                                alert('Заказ успешно добавлен.');
+
+                                JSWorks.applicationContext.router.navigate(
+                                    JSWorks.applicationContext.routeHolder.getRoute('OrdersRoute'),
+                                    {},
+                                )
+                            } else {
+                                alert('Ошибка добалвения заказа.')
+                            }
+                        }).catch((err) => {
+                            alert(`Ошибка: ${err}`);
+                        });
+                    });
+                });
+            }, 10);
+        });
     }
 
 }

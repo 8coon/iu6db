@@ -11,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -26,16 +27,21 @@ public class Client {
     }
 
 
-    @PostMapping("/{id}/order/create")
+    @PostMapping("/{id}/orders/new")
     public ResponseEntity<Response> create(
-            @RequestParam("id") int client,
+            @PathVariable("id") int client,
             @RequestBody OrderData order
     ) {
-        order.setClient(client);
+        List<String> strings = new ArrayList<String>();
+
+        for (Integer flight: order.getFlight()) {
+            strings.add(String.valueOf(flight));
+        }
 
         this.jdbc.update(
-                "INSERT INTO Orders (client, date, flight) VALUES (?, ?, ?)",
-                order.getClient(), order.getDate(), order.getFlight()
+                "INSERT INTO Orders (client, date, flight) VALUES (?, ?::TIMESTAMP, '{" +
+                        String.join(", ", strings.toArray(new String[] {})) + "}')",
+                client, order.getDate()
         );
 
         return new ResponseEntity<>(
