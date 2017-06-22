@@ -67,14 +67,13 @@ public class OrderData implements RowMapper<OrderData> {
                 ).format(
                         DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS")
                 ),
-                (Integer[]) resultSet.getArray("flight").getArray(),
+                (Integer[]) resultSet.getArray("flights").getArray(),
                 (Integer) resultSet.getObject("reverse"),
                 null,
                 null
         );
 
         order.setClientName(resultSet.getString("clientName"));
-        order.setFirstFlightId(resultSet.getInt("flightId"));
         order.setFirstFlightDate(resultSet.getString("flightStart"));
         order.setAirlineCode(resultSet.getString("airlineCode"));
         order.setAirlineName(resultSet.getString("airlineName"));

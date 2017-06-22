@@ -51,18 +51,19 @@ public class Client {
             reverseId = response.getBody().id;
         }
 
-        List<String> strings = new ArrayList<>();
-
-        for (Integer flight: order.getFlight()) {
-            strings.add(String.valueOf(flight));
-        }
-
         int id = this.jdbc.queryForObject(
-                "INSERT INTO Orders (client, date, flight, reverse) VALUES (?, ?::TIMESTAMP, '{" +
-                        String.join(", ", strings.toArray(new String[] {})) + "}', ?) RETURNING id",
+                "INSERT INTO Orders (client, date, reverse) VALUES (?, ?::TIMESTAMP, ?) RETURNING id",
                 Integer.class,
                 client, order.getDate(), reverseId
         );
+
+
+        for (Integer flight: order.getFlight()) {
+            this.jdbc.update(
+                    "INSERT INTO OrderFlights (\"order\", flight) VALUES (?, ?)",
+                        id, flight
+            );
+        }
 
         return new ResponseEntity<>(
                 new Response("success", id),

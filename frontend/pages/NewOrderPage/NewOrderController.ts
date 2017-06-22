@@ -180,105 +180,75 @@ export class NewOrderController extends AbstractController {
             this.component.flights = flights.flights;
             this.component.reverseFlights = flights.reverseFlights;
 
-            window.setTimeout(() => {
-                const patchFlights = (rootClass: string) => {
-                    const root: SimpleVirtualDOMElement = this.view.DOMRoot.querySelector(`.${rootClass}`);
-                    const flights: SimpleVirtualDOMElement[] = root.querySelectorAll('.flight');
+            const patchFlights = (rootClass: string) => {
+                const root: SimpleVirtualDOMElement = this.view.DOMRoot.querySelector(`.${rootClass}`);
+                const flights: SimpleVirtualDOMElement[] = root.querySelectorAll('.flight');
 
-                    flights.forEach((flight: SimpleVirtualDOMElement) => {
-                        flight.toggleClass('flight-selected', false);
+                flights.forEach((flight: SimpleVirtualDOMElement) => {
+                    flight.toggleClass('flight-selected', false);
 
-                        flight.removeEventListeners();
-                        flight.addEventListener('click', () => {
-                            flights.forEach((flight: SimpleVirtualDOMElement) => {
-                                flight.toggleClass('flight-selected', false);
-                            });
+                    flight.removeEventListeners();
+                    flight.addEventListener('click', () => {
+                        flights.forEach((flight: SimpleVirtualDOMElement) => {
+                            flight.toggleClass('flight-selected', false);
+                        });
 
-                            flight.toggleClass('flight-selected', true);
-                        })
+                        flight.toggleClass('flight-selected', true);
                     });
-                };
+                });
+            };
 
-                patchFlights('flight-list');
-                patchFlights('reverse-flight-list');
+            patchFlights('flight-list');
+            patchFlights('reverse-flight-list');
 
 
-                const button: SimpleVirtualDOMElement = this.view.DOMRoot.querySelector('#order');
+            const button: SimpleVirtualDOMElement = this.view.DOMRoot.querySelector('#order');
 
-                button.removeEventListeners();
-                button.addEventListener('click', () => {
-                    const parseId = (rootClass: string): number => {
-                        const root: SimpleVirtualDOMElement = this.view.DOMRoot.querySelector(`.${rootClass}`);
-                        const flight: SimpleVirtualDOMElement = root.querySelector('.flight-selected');
+            button.removeEventListeners();
+            button.addEventListener('click', () => {
+                const parseId = (rootClass: string): number => {
+                    const root: SimpleVirtualDOMElement = this.view.DOMRoot.querySelector(`.${rootClass}`);
+                    const flight: SimpleVirtualDOMElement = root.querySelector('.flight-selected');
 
-                        if (flight) {
-                            return parseInt(flight.querySelector('.flight-code').querySelector('view-eval')
-                                    .children.item(0).text.split('-')[1], 10);
-                        }
-
-                        return undefined;
-                    };
-
-                    let reverseDate: Date;
-
-                    if (value(reverseDateFlight).length > 0) {
-                        reverseDate = new Date(value(reverseDateFlight));
+                    if (flight) {
+                        return parseInt(flight.querySelector('.flight-code').querySelector('view-eval')
+                                .children.item(0).text.split('-')[1], 10);
                     }
 
-                    button.addEventListener('click', () => {
-                        this.net.createOrder(
-                            this.net.idByDisplay(value(userSelect)),
-                            new Date(value(orderDateInput)),
-                            reverseDate,
-                            parseId('flight-list'),
-                            [],
-                            parseId('reverse-flight-list'),
-                            []
-                        ).then((success: boolean) => {
-                            if (success) {
-                                alert('Заказ успешно добавлен.');
+                    return undefined;
+                };
 
-                                JSWorks.applicationContext.router.navigate(
-                                    JSWorks.applicationContext.routeHolder.getRoute('OrdersRoute'),
-                                    {},
-                                )
-                            } else {
-                                alert('Ошибка добалвения заказа.')
-                            }
-                        }).catch((err) => {
-                            alert(`Ошибка: ${err}`);
-                        });
+                let reverseDate: Date;
+
+                if (value(reverseDateFlight).length > 0) {
+                    reverseDate = new Date(value(reverseDateFlight));
+                }
+
+                button.addEventListener('click', () => {
+                    this.net.createOrder(
+                        this.net.idByDisplay(value(userSelect)),
+                        new Date(value(orderDateInput)),
+                        reverseDate,
+                        parseId('flight-list'),
+                        [],
+                        parseId('reverse-flight-list'),
+                        []
+                    ).then((success: boolean) => {
+                        if (success) {
+                            alert('Заказ успешно добавлен.');
+
+                            JSWorks.applicationContext.router.navigate(
+                                JSWorks.applicationContext.routeHolder.getRoute('OrdersRoute'),
+                                {},
+                            )
+                        } else {
+                            alert('Ошибка добалвения заказа.')
+                        }
+                    }).catch((err) => {
+                        alert(`Ошибка: ${err}`);
                     });
-
                 });
-
-                /*const buttons: SimpleVirtualDOMElement[] = this.view.DOMRoot.querySelectorAll('.order-button');
-
-                buttons.forEach((button: SimpleVirtualDOMElement) => {
-                    button.removeEventListeners();
-                    button.addEventListener('click', () => {
-                        this.net.createOrder(
-                            this.net.idByDisplay(value(userSelect)),
-                            new Date(value(orderDateInput)),
-                            parseInt(button.id.split('-')[1], 10),
-                            []
-                        ).then((success: boolean) => {
-                            if (success) {
-                                alert('Заказ успешно добавлен.');
-
-                                JSWorks.applicationContext.router.navigate(
-                                    JSWorks.applicationContext.routeHolder.getRoute('OrdersRoute'),
-                                    {},
-                                )
-                            } else {
-                                alert('Ошибка добалвения заказа.')
-                            }
-                        }).catch((err) => {
-                            alert(`Ошибка: ${err}`);
-                        });
-                    });
-                });*/
-            }, 10);
+            });
         });
     }
 

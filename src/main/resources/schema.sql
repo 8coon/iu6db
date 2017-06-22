@@ -4,6 +4,7 @@ DROP VIEW IF EXISTS flightsFromCity;
 DROP VIEW IF EXISTS clientOrders;
 DROP VIEW IF EXISTS flightsFromCityToCity;
 DROP VIEW IF EXISTS clients;
+DROP TABLE IF EXISTS OrderFlights;
 DROP TABLE IF EXISTS Orders;
 DROP TABLE IF EXISTS Flights;
 DROP TABLE IF EXISTS Airports;
@@ -57,8 +58,13 @@ CREATE TABLE IF NOT EXISTS Orders (
   id SERIAL PRIMARY KEY,
   client INT REFERENCES Users,
   date TIMESTAMP,
-  flight INT[],
   reverse INT REFERENCES Orders DEFAULT NULL
+);
+
+
+CREATE TABLE IF NOT EXISTS OrderFlights (
+  "order" INT REFERENCES Orders,
+  flight INT REFERENCES Flights
 );
 
 
@@ -172,19 +178,25 @@ BEGIN
 END;' LANGUAGE plpgsql;
 
 
-CREATE OR REPLACE FUNCTION generateOrders(amount INT) RETURNS VOID AS 'BEGIN
+CREATE OR REPLACE FUNCTION generateOrders(amount INT) RETURNS VOID AS '
+DECLARE
+  nextId INT;
+BEGIN
   FOR i IN 1..amount LOOP
     CREATE TEMPORARY TABLE flight AS
       (SELECT * FROM Flights OFFSET floor(random() * (SELECT count(*) FROM Flights)) LIMIT 1);
 
-    INSERT INTO Orders (client, date, flight) VALUES
+    nextId := (SELECT nextval(''orders_id_seq''));
+
+    INSERT INTO Orders (client, date, id) VALUES
       (
         (SELECT id FROM Users OFFSET floor(random() * (SELECT count(*) FROM Users)) LIMIT 1),
         (SELECT dateStart FROM flight)::TIMESTAMP - random() * (TIMESTAMP ''2014-02-01 10:00:00'' -
           TIMESTAMP ''2014-01-10 10:00:00'') - (TIMESTAMP ''2014-01-10 10:00:00'' -
-                                                TIMESTAMP ''2014-01-01 10:00:00''),
-        ARRAY[]::INT[] || (SELECT id FROM flight)
+                                                TIMESTAMP ''2014-01-01 10:00:00''), nextId
       );
+
+    INSERT INTO OrderFlights ("order", flight) VALUES (nextId, (SELECT id FROM flight));
 
     DROP TABLE flight;
   END LOOP;
@@ -286,29 +298,36 @@ CREATE VIEW flightsFromCity AS (
 
 
 CREATE VIEW clientOrders AS (
-    SELECT
-      Orders.id AS id, client, date, flight, reverse,
-      (Users.lastName || ' '::TEXT || Users.firstName || ' '::TEXT || Users.midName) AS clientName,
-      FirstFlight.id AS flightId,
-      FirstFlight.dateStart AS flightStart,
-      Airlines.code AS airlineCode,
-      Airlines.name AS airlineName,
-      FromAirport.code AS fromAirportCode,
-      FromAirport.name || ', '::TEXT || FromCity.name || ', ' || FromCity.country AS fromAirportName,
-      ToAirport.code AS toAirportCode,
-      ToAirport.name || ', '::TEXT || ToCity.name || ', ' || ToCity.country AS toAirportName
-    FROM
-      Orders
-      JOIN Users ON Orders.client = Users.id
-      JOIN Flights AS FirstFlight ON Orders.flight[1] = FirstFlight.id
-      JOIN Flights AS LastFlight ON Orders.flight[array_length(Orders.flight, 1)] = LastFlight.id
-      JOIN Airlines ON FirstFlight.airline = Airlines.id
-      JOIN Airports AS FromAirport ON FirstFlight.fromAirport = FromAirport.id
-      JOIN Airports AS ToAirport ON LastFlight.toAirport = ToAirport.id
-      JOIN Cities AS FromCity ON FromAirport.city = FromCity.id
-      JOIN Cities AS ToCity ON ToAirport.city = ToCity.id
-    ORDER BY
-      date
+  SELECT
+    t.id AS id, client, date, reverse, flights,
+    (Users.lastName || ' '::TEXT || Users.firstName || ' '::TEXT || Users.midName) AS clientName,
+    Airlines.code AS airlineCode,
+    Airlines.name AS airlineName,
+    FromAirport.code AS fromAirportCode,
+    FromAirport.name || ', '::TEXT || FromCity.name || ', ' || FromCity.country AS fromAirportName,
+    ToAirport.code AS toAirportCode,
+    ToAirport.name || ', '::TEXT || ToCity.name || ', ' || ToCity.country AS toAirportName,
+    FirstFlight.dateStart AS flightStart
+  FROM
+    (
+      SELECT
+        Orders.id AS id, client, date, reverse,
+        array_agg((SELECT flight FROM OrderFlights WHERE "order" = Orders.id)) AS flights
+      FROM
+        Orders
+      GROUP BY
+        Orders.id
+      ORDER BY
+        date
+    ) AS t
+    JOIN Users ON t.client = Users.id
+    JOIN Flights AS FirstFlight ON flights[1] = FirstFlight.id
+    JOIN Flights AS LastFlight ON flights[array_length(flights, 1)] = LastFlight.id
+    JOIN Airlines ON FirstFlight.airline = Airlines.id
+    JOIN Airports AS FromAirport ON FirstFlight.fromAirport = FromAirport.id
+    JOIN Airports AS ToAirport ON LastFlight.toAirport = ToAirport.id
+    JOIN Cities AS FromCity ON FromAirport.city = FromCity.id
+    JOIN Cities AS ToCity ON ToAirport.city = ToCity.id
 );
 
 
