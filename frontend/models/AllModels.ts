@@ -22,8 +22,8 @@ export class OrderData extends BackendData {
     public reverse: number;
 
     public clientName: string;
-    public flightId: number;
-    public flightStart: string;
+    public firstFlightId: number;
+    public firstFlightDate: string;
     public airlineCode: string;
     public airlineName: string;
     public fromAirportCode: string;
@@ -32,11 +32,15 @@ export class OrderData extends BackendData {
     public toAirportName: string;
 
     public get formattedFlightStart(): string {
-        return this.flightStart;
+        return this.firstFlightDate;
+    }
+
+    public get formattedFlightEnd(): string {
+        return ''; //this.flightEnd;
     }
 
     public get flightCode(): string {
-        return `${this.airlineCode}-${this.flightId}`;
+        return `${this.airlineCode}-${this.firstFlightId}`;
     }
 
 }

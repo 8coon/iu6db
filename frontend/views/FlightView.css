@@ -1,0 +1,45 @@
+
+
+.flight {
+    display: flex;
+    flex-direction: column;
+    padding: 12px;
+    margin-bottom: 12px;
+    border: 4px dashed rgb(220, 220, 220);
+}
+
+
+.flight-title-bar {
+    display: flex;
+    flex-direction: row;
+    font-size: 200%;
+    justify-content: space-between;
+    padding-bottom: 5px;
+}
+
+
+.flight-inline {
+    padding-bottom: 5px;
+}
+
+
+.flight-inline * {
+    display: inline;
+}
+
+
+.flight-no-accent {
+    opacity: 0.4;
+}
+
+
+.flight-data * {
+    text-align: center;
+    color: darkgreen;
+}
+
+
+.flight-data a {
+    color: yellowgreen;
+}
+

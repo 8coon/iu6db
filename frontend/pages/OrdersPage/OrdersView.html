@@ -1,9 +1,66 @@
 <app-view id="OrdersView">
 
-    Выберите клиента: <select id="current-client"></select>
+    <div class="header">
+        <h1>
+            бронирование авиабилетов
+        </h1>
 
-    <view-for variable="order" in="$.orders">
-        <view-eval value="JSON.stringify(order)"></view-eval>
+        <button type="button" id="new-order">Забронировать</button>
+    </div>
+
+    <div class="client-selector">
+        Выберите клиента: <select id="current-client"></select>
+    </div>
+
+    <view-for variable="order" in="$.orders" class="orders">
+
+        <div class="flight">
+            <div class="flight-title-bar">
+
+                <div class="flight-title flight-inline">
+                    <view-eval value="order.fromAirportCode"></view-eval>
+                    <i class="fa fa-long-arrow-right" aria-hidden="true"></i>
+                    <view-eval value="order.toAirportCode"></view-eval>
+                </div>
+
+                <div class="flight-code flight-inline">
+                    <view-eval value="order.flightCode"></view-eval>
+                </div>
+
+            </div>
+
+            <div class="flight-from flight-inline">
+                <span class="flight-no-accent">Из</span>
+                <view-eval value="order.fromAirportName"></view-eval>
+            </div>
+
+            <div class="flight-to flight-inline">
+                <span class="flight-no-accent">В</span>
+                <view-eval value="order.toAirportName"></view-eval>
+            </div>
+
+            <div class="flight-start flight-inline">
+                <span class="flight-no-accent">Начало в</span>
+                <view-eval value="order.formattedFlightStart"></view-eval>
+            </div>
+
+            <div class="flight-end flight-inline">
+                <span class="flight-no-accent">Окончание в</span>
+                <view-eval value="order.formattedFlightEnd"></view-eval>
+            </div>
+
+
+            <div class="flight-data">
+                <view-if condition="order.flight.length > 1" static>
+                    <view-then>
+                        <link-to route="DetailsRoute" args="{id: order.id}">
+                            Посмотреть данные стыковых рейсов
+                        </link-to>
+                    </view-then><view-else>Прямой рейс</view-else>
+                </view-if>
+            </div>
+        </div>
+
     </view-for>
 
 </app-view>
