@@ -1,6 +1,6 @@
 'use strict';
 import {JSWorksLib} from "jsworks/dist/dts/jsworks";
-import {ClientData, OrderData} from "../../models/AllModels";
+import {ClientData, OrderData, DetailsData} from "../../models/AllModels";
 
 
 declare const JSWorks: JSWorksLib;
@@ -10,6 +10,6 @@ declare const JSWorks: JSWorksLib;
 export class DetailsPage {
 
     @(<any> JSWorks.ComponentCollectionProperty())
-    public order: OrderData[] = [];
+    public details: DetailsData[] = [];
 
 }

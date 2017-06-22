@@ -108,6 +108,20 @@ export interface FlightsData {
 }
 
 
+export class DetailsData extends BackendData{
+    public date: string;
+    public order: number;
+    public flights: FlightData[];
+
+    public get formattedDate(): string {
+        return this.date;
+    }
+
+    public set formattedDate(value: string) {
+    }
+}
+
+
 @JSWorks.Model
 export class AllModels implements IModel {
 
@@ -196,8 +210,15 @@ export class AllModels implements IModel {
     }
 
 
-    public createOrder(client: number, date: Date, reverseDate: Date, flight: number, children: number[],
-                reverseFlight: number, reverseChildren: number[]): Promise<boolean> {
+    public createOrder(
+        client: number,
+        date: Date,
+        reverseDate: Date,
+        flight: number,
+        children: number[],
+        reverseFlight: number,
+        reverseChildren: number[]
+    ): Promise<boolean> {
         let reverseDateString: string;
         let reverseFlightArray: number[];
 
@@ -217,6 +238,27 @@ export class AllModels implements IModel {
                 { 'Content-Type': 'application/json' }
             ).then(() => {
                 resolve(true);
+            }).catch((err) => {
+                reject(err);
+            });
+        });
+    }
+
+
+    public details(id: number): Promise<DetailsData> {
+        return new Promise<DetailsData>((resolve, reject) => {
+            this.jsonParser.parseURLAsync(
+                `${JSWorks.config['backendURL']}/api/order/${id}/details`,
+                JSWorks.HTTPMethod.GET,
+                null,
+                { 'Content-Type': 'application/json' }
+            ).then((data: DetailsData) => {
+                data = <DetailsData> BackendData.Apply(new DetailsData(), data);
+                data.flights = data.flights.map(
+                    flight => <FlightData> BackendData.Apply(new FlightData(), flight)
+                );
+
+                resolve(data);
             }).catch((err) => {
                 reject(err);
             });

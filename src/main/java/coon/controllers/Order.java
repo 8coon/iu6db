@@ -37,6 +37,7 @@ public class Order {
         return new ResponseEntity<>(
                 new Object() {
                     public String date = flightList.get(0).orderDate;
+                    public int order = flightList.get(0).order;
                     public List<FlightData> flights = flightList;
                 },
                 HttpStatus.OK

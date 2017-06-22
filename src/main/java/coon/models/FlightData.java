@@ -23,6 +23,7 @@ public class FlightData implements RowMapper<FlightData> {
     private String dateEnd;
 
     public String orderDate = null;
+    public Integer order = null;
 
 
     public FlightData() {}
@@ -67,8 +68,11 @@ public class FlightData implements RowMapper<FlightData> {
             ).format(
                     DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS")
             );
+
+            fd.order = resultSet.getInt("order");
         } catch (SQLException e) {
             fd.orderDate = null;
+            fd.order = null;
         }
 
         return fd;
