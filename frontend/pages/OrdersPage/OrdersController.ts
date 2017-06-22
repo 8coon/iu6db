@@ -24,6 +24,7 @@ export class OrdersController extends AbstractController {
 
         const select: SimpleVirtualDOMElement = this.view.DOMRoot.querySelector('#current-client');
         select.removeChildren();
+        this.component.orders = [];
 
         select.removeEventListeners();
         select.addEventListener('change', () => {
@@ -31,6 +32,20 @@ export class OrdersController extends AbstractController {
 
             this.net.clientOrders(this.net.idByDisplay(clientDisplay)).then((orders: OrderData[]) => {
                 this.component.orders = orders;
+
+                window.setTimeout(() => {
+                    const buttons: SimpleVirtualDOMElement[] = this.view.DOMRoot.querySelectorAll('.details-button');
+
+                    buttons.forEach((button: SimpleVirtualDOMElement) => {
+                        button.removeEventListeners();
+                        button.addEventListener('click', () => {
+                            JSWorks.applicationContext.router.navigate(
+                                JSWorks.applicationContext.routeHolder.getRoute('DetailsRoute'),
+                                { id: parseInt(button.id.split('-')[1], 10) },
+                            )
+                        });
+                    });
+                }, 10);
             });
         });
 

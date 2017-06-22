@@ -25,6 +25,8 @@ export class NewOrderController extends AbstractController {
                 this.view.DOMRoot.querySelector('.select-date')).component;
         calendar.controller.updateCalendar();
         calendar.controller.hide();
+        this.component.flights = [];
+        this.component.reverseFlights = [];
 
         const reverse: SimpleVirtualDOMElement = this.view.DOMRoot.querySelector('#reverse');
         reverse.setStyleAttribute('display', 'none');

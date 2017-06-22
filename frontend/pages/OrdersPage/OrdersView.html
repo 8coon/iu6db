@@ -4,8 +4,6 @@
         Выберите клиента: <span class="select"><select id="current-client"></select></span>
     </div>
 
-    <view-component name="CalendarComponent" class="select-date"></view-component>
-
     <view-for variable="order" in="$.orders" class="orders">
 
         <div class="flight">
@@ -16,7 +14,7 @@
                 </div>
 
                 <div class="flight-code flight-inline">
-                    <view-eval value="order.flightCode"></view-eval>
+                    <button type="button" class="details-button" id="details-${order.id}">Подробнее</button>
                 </div>
 
             </div>
@@ -48,13 +46,11 @@
             </view-if>
 
 
+            <br>
             <div class="flight-data">
                 <view-if condition="order.flight.length > 1" static>
-                    <view-then>
-                        <link-to route="DetailsRoute" args="{id: order.id}">
-                            Посмотреть данные стыковых рейсов
-                        </link-to>
-                    </view-then><view-else>Прямой рейс</view-else>
+                    <view-then>Несколько стыковых рейсов</view-then>
+                    <view-else>Прямой рейс</view-else>
                 </view-if>
             </div>
         </div>
