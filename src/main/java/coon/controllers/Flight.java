@@ -38,7 +38,8 @@ public class Flight {
         FlightsListResponse flights = new FlightsListResponse(
                 this.jdbc.query(
                     "SELECT * FROM flightsFromCityToCity WHERE " +
-                            "fromCityId = ? AND toCityId = ? AND dateStart::DATE = ?::TIMESTAMP::DATE",
+                            "fromCityId = ? AND toCityId = ? AND " +
+                            "date_trunc('day', dateStart) = date_trunc('day', ?::TIMESTAMPTZ)",
                     new FlightData(),
                     fromCity, toCity, date
                 ),
@@ -49,7 +50,8 @@ public class Flight {
             flights.setReverseFlights(
                     this.jdbc.query(
                             "SELECT * FROM flightsFromCityToCity WHERE " +
-                                    "fromCityId = ? AND toCityId = ? AND dateStart::DATE = ?::TIMESTAMP::DATE",
+                                    "fromCityId = ? AND toCityId = ? AND " +
+                                    "date_trunc('day', dateStart) = date_trunc('day', ?::TIMESTAMPTZ)",
                             new FlightData(),
                             toCity, fromCity, reverse
                     )
