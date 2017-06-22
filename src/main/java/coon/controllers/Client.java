@@ -2,6 +2,7 @@ package coon.controllers;
 
 
 import coon.json.Response;
+import coon.models.CityData;
 import coon.models.ClientData;
 import coon.models.OrderData;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -65,6 +66,18 @@ public class Client {
                 this.jdbc.query(
                         "SELECT * FROM clients",
                         new ClientData()
+                ),
+                HttpStatus.OK
+        );
+    }
+
+
+    @GetMapping("/cities")
+    public ResponseEntity<List<CityData>> cities() {
+        return new ResponseEntity<>(
+                this.jdbc.query(
+                        "SELECT id, (name || ', '::TEXT || country) AS name FROM Cities",
+                        new CityData()
                 ),
                 HttpStatus.OK
         );

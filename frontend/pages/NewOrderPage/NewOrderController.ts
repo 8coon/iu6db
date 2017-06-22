@@ -2,7 +2,7 @@ import {JSWorksLib} from "jsworks/dist/dts/jsworks";
 import {View} from "jsworks/dist/dts/View/View";
 import {SimpleVirtualDOMElement} from "jsworks/dist/dts/VirtualDOM/SimpleVirtualDOM/SimpleVirtualDOMElement";
 import {SimpleVirtualDOM} from "jsworks/dist/dts/VirtualDOM/SimpleVirtualDOM/SimpleVirtualDOM";
-import {AllModels, ClientData, OrderData} from "../../models/AllModels";
+import {AllModels, ClientData, OrderData, CityData} from "../../models/AllModels";
 import {NewOrderPage} from "./NewOrderPage";
 import {AbstractController} from "../AbstractController";
 import {CalendarComponent} from "../../components/CalendarComponent/CalendarComponent";
@@ -50,7 +50,8 @@ export class NewOrderController extends AbstractController {
         const virtualDOM: SimpleVirtualDOM = JSWorks.applicationContext.serviceHolder
                 .getServiceByName('SimpleVirtualDOM');
 
-        /*const select: SimpleVirtualDOMElement = this.view.DOMRoot.querySelector('#current-client');
+
+        const select: SimpleVirtualDOMElement = this.view.DOMRoot.querySelector('#current-client');
         select.removeChildren();
 
         select.removeEventListeners();
@@ -73,7 +74,41 @@ export class NewOrderController extends AbstractController {
                 option.appendChild(virtualDOM.createTextElement(client.displayName));
                 select.appendChild(option);
             });
-        });*/
+        });
+
+
+        const fromSelect: SimpleVirtualDOMElement = this.view.DOMRoot.querySelector('#from-city');
+        fromSelect.removeChildren();
+
+        fromSelect.removeEventListeners();
+        fromSelect.addEventListener('change', () => {
+            // ToDo: validate
+        });
+
+
+        const toSelect: SimpleVirtualDOMElement = this.view.DOMRoot.querySelector('#to-city');
+        toSelect.removeChildren();
+
+        toSelect.removeEventListeners();
+        toSelect.addEventListener('change', () => {
+            // ToDo: validate
+        });
+
+
+        this.net.cities().then((cities: CityData[]) => {
+            const option: SimpleVirtualDOMElement = virtualDOM.createElement('OPTION');
+            option.appendChild(virtualDOM.createTextElement('Выберите город:'));
+            fromSelect.appendChild(option);
+            toSelect.appendChild(option.cloneNode());
+
+            cities.forEach((city: CityData) => {
+                const option: SimpleVirtualDOMElement = virtualDOM.createElement('OPTION');
+                option.appendChild(virtualDOM.createTextElement(city.displayName));
+                fromSelect.appendChild(option);
+                toSelect.appendChild(option.cloneNode());
+            });
+        });
+
     }
 
 }

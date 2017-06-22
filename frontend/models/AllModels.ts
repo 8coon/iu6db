@@ -56,6 +56,16 @@ export class ClientData extends BackendData {
 }
 
 
+export class CityData extends BackendData {
+    public id: number;
+    public name: string;
+
+    public get displayName(): string {
+        return `${this.id} - ${this.name}`;
+    }
+}
+
+
 @JSWorks.Model
 export class AllModels implements IModel {
 
@@ -92,6 +102,22 @@ export class AllModels implements IModel {
                 { 'Content-Type': 'application/jsonParser' }
             ).then((orders: any[]) => {
                 resolve(orders.map(order => <ClientData> BackendData.Apply(new ClientData(), order)));
+            }).catch((err) => {
+                reject(err);
+            });
+        });
+    }
+
+
+    public cities(): Promise<CityData[]> {
+        return new Promise<CityData[]>((resolve, reject) => {
+            this.jsonParser.parseURLAsync(
+                `${JSWorks.config['backendURL']}/api/client/cities`,
+                JSWorks.HTTPMethod.GET,
+                null,
+                { 'Content-Type': 'application/jsonParser' }
+            ).then((orders: any[]) => {
+                resolve(orders.map(order => <CityData> BackendData.Apply(new CityData(), order)));
             }).catch((err) => {
                 reject(err);
             });
