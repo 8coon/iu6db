@@ -60,7 +60,7 @@ h2 {
 
 button {
     display: block;
-    padding: 20px;
+    padding: 10px;
     background-color: black;
     opacity: 0.5;
     color: white;
@@ -155,5 +155,17 @@ input {
     color: darkred;
     font-weight: 200;
     opacity: 0.8;
+}
+
+
+#new-order {
+    min-width: 130px;
+}
+
+
+.form-buttons {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
 }
 

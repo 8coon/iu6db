@@ -104,6 +104,22 @@ export class NewOrderController extends AbstractController {
         select.addEventListener('change', () => {
             this.checkReady(select, fromSelect, toSelect, dateInputs[0], dateInputs[1]);
         });
+
+        const reverse: SimpleVirtualDOMElement = this.view.DOMRoot.querySelector('#reverse');
+
+        reverse.removeEventListeners();
+        reverse.addEventListener('click', () => {
+            const from = (<any> fromSelect.rendered).value;
+            const to = (<any> toSelect.rendered).value;
+
+            (<any> fromSelect.rendered).value = to;
+            (<any> toSelect.rendered).value = from;
+
+            fromSelect.setAttribute('value', to);
+            toSelect.setAttribute('value', from);
+
+            this.checkReady(select, fromSelect, toSelect, dateInputs[0], dateInputs[1]);
+        });
     }
 
 
